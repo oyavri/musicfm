@@ -1,3 +1,7 @@
-To run the project
-$ docker-compose build app
-$ docker-compose build -d
+# To run the project
+```sh
+docker-compose build app
+```
+```sh
+docker-compose up -d
+```
