@@ -1,0 +1,55 @@
+LOAD DATA INFILE '/data/artists.csv'
+INTO TABLE ARTIST
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS (`name`, `short_info`);
+
+LOAD DATA INFILE '/data/albums.csv'
+INTO TABLE ALBUM
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS (`artist_id`, `name`, `type`, `release_date`);
+
+LOAD DATA INFILE '/data/tracks.csv'
+INTO TABLE TRACK
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS (`album_id`, `name`, `length_sec`);
+
+LOAD DATA INFILE '/data/users.csv'
+INTO TABLE USER
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS (`nickname`,`email`,`gender`);
+
+LOAD DATA INFILE '/data/likes.csv'
+INTO TABLE USER_LIKE
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS (`user_id`, `track_id`);
+
+LOAD DATA INFILE '/data/rates.csv'
+INTO TABLE RATE
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS (`user_id`, `track_id`, `rate`);
+
+LOAD DATA INFILE '/data/playlists.csv'
+INTO TABLE PLAYLIST
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS (`name`,`user_id`);
+
+LOAD DATA INFILE '/data/contains.csv'
+INTO TABLE CONTAIN
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS (`playlist_id`, `track_id`);
