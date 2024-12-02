@@ -28,7 +28,7 @@ create table ALBUM (
 create table TRACK (
     id int auto_increment,
     `name` varchar(255) not null,
-    length_sec smallint check (length_sec > 0) not null,
+    length_sec float(3) check (length_sec > 0) not null,
     album_id int,
 
     primary key (id),
