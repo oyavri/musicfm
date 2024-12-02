@@ -9,13 +9,23 @@ services:
       MYSQL_PASSWORD: 'password'
       MYSQL_ROOT_PASSWORD: 'password'
     ports:
-      - '3000:3306'
+      - '3306:3306'
     volumes:
       - ./db_scripts:/docker-entrypoint-initdb.d
       - ./data:/data
     command: --secure-file-priv="" --local-infile=1
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 5s
+      interval: 2s
+      retries: 10
   app:
+    depends_on:
+      db:
+        condition: service_healthy
     container_name: app-container
     build: .
     ports:
       - 8000:5000
+    volumes:
+      - ./server:/app
