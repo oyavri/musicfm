@@ -12,8 +12,18 @@ def singleton(cls):
 
 @singleton
 class db:
-    def __init__(self, config):
-        self.pool = mysql.connector.pooling.MySQLConnectionPool(**config)
+    db_config = {
+                "host":"db",
+                "user":"user",
+                "password":"password",
+                "database":"MUSICFM",
+                "port":3306       
+    }
+
+    pool = mysql.connector.pooling.MySQLConnectionPool(**db_config)
+
+    def __init__(self):
+        pass
     
     def connect(self):
         return self.pool.get_connection()
