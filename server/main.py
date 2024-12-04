@@ -9,6 +9,9 @@ app.url_map.strict_slashes = False
 from resources.artists import artists_bp
 app.register_blueprint(artists_bp, url_prefix="/")
 
+from resources.albums import albums_bp
+artists_bp.register_blueprint(albums_bp)
+
 @app.route("/")
 def hello():
     return "Hello world!"
