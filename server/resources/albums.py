@@ -66,6 +66,20 @@ def get_album(artist_id, album_id):
         cursor = connection.cursor(dictionary=True)
 
         cursor.execute(f'''
+                       SELECT * FROM ARTIST WHERE id = {artist_id};
+                       ''')
+        result = cursor.fetchone()
+
+        if result is None:
+            cursor.close()
+            connection.close()
+            return jsonify(
+                    {
+                        "error": "There is no artist with given artist id."
+                    }
+                ), NOT_FOUND
+
+        cursor.execute(f'''
                         SELECT album.id as album_id, album.artist_id, album.name, album.type, album.release_date 
                         FROM ALBUM AS album 
                         JOIN ARTIST AS artist 
@@ -79,7 +93,7 @@ def get_album(artist_id, album_id):
             connection.close()
             return jsonify(
                     {
-                        "error": "Album not found"
+                        "error": "There is no such album associated with given artist id."
                     }
                 ), NOT_FOUND
         
@@ -157,9 +171,9 @@ def add_album(artist_id):
             connection.close()
             return jsonify(
                     {
-                        "error": "There is no artist with given id."
+                        "error": "There is no artist with given artist id."
                     }
-                ), BAD_REQUEST
+                ), NOT_FOUND
 
         cursor.execute('''
                        INSERT INTO ALBUM (artist_id, name, `type`, release_date)
@@ -256,7 +270,7 @@ def update_album(artist_id, album_id):
                     {
                         "error": "There is no artist with given artist id."
                     }
-                ), BAD_REQUEST
+                ), NOT_FOUND
 
         cursor.execute(f'''
                        SELECT * 
@@ -274,7 +288,7 @@ def update_album(artist_id, album_id):
                     {
                         "error": "There is no such album associated with given artist id."
                     }
-                ), BAD_REQUEST
+                ), NOT_FOUND
 
         cursor.execute(f'''
                        UPDATE ALBUM
@@ -353,7 +367,7 @@ def modify_album(artist_id, album_id):
                     {
                         "error": "There is no artist with given artist id."
                     }
-                ), BAD_REQUEST
+                ), NOT_FOUND
     
         cursor.execute(f'''
                        SELECT * 
@@ -371,7 +385,7 @@ def modify_album(artist_id, album_id):
                     {
                         "error": "There is no such album associated with given artist id."
                     }
-                ), BAD_REQUEST
+                ), NOT_FOUND
         
         if not name and not album_type and not release_date:
             cursor.close()
@@ -466,6 +480,15 @@ def delete_album(artist_id, album_id):
                        DELETE FROM ALBUM
                        WHERE id = {album_id};
                        ''')
+
+        cursor.close()
+        connection.close()
+
+        return jsonify(
+                {
+                    "message": "Album deleted successfully.", 
+                }
+            ), OK
 
     except ValueError:
         return jsonify(
