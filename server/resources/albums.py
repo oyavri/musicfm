@@ -17,7 +17,41 @@ def is_valid_date(date):
         return True
     except ValueError:
         return False
+
+def no_artist():
+    return jsonify(
+            {
+                "error": "There is no artist with given artist id."
+            }
+        ), NOT_FOUND
     
+def no_album():
+    return jsonify(
+                    {
+                        "error": "There is no such album associated with given artist id."
+                    }
+                ), NOT_FOUND
+
+def id_error():
+    return jsonify(
+                {
+                    "error": "Artist id and album id must be an integer."
+                }
+            ), BAD_REQUEST
+
+def internal_error():
+    return jsonify(
+                {
+                    "error": "An internal error occurred."
+                }
+            ), INTERNAL_SERVER_ERROR
+
+def no_data():
+    return jsonify(
+                    {
+                        "error": "Unsupported format of request."
+                    }
+                ), BAD_REQUEST
 
 
 @albums_bp.route('/albums', methods=['GET'])
@@ -47,12 +81,7 @@ def get_albums(artist_id):
                 }
             ), BAD_REQUEST
     except:
-        return jsonify(
-                {
-                    "error": "An internal error occurred."
-                }
-            ), INTERNAL_SERVER_ERROR
-
+        return internal_error()
 
 
 
@@ -73,11 +102,7 @@ def get_album(artist_id, album_id):
         if result is None:
             cursor.close()
             connection.close()
-            return jsonify(
-                    {
-                        "error": "There is no artist with given artist id."
-                    }
-                ), NOT_FOUND
+            return no_artist()
 
         cursor.execute(f'''
                         SELECT album.id as album_id, album.artist_id, album.name, album.type, album.release_date 
@@ -91,27 +116,15 @@ def get_album(artist_id, album_id):
         if result is None:
             cursor.close()
             connection.close()
-            return jsonify(
-                    {
-                        "error": "There is no such album associated with given artist id."
-                    }
-                ), NOT_FOUND
+            return no_album()
         
         cursor.close()
         connection.close()
         return jsonify(result), OK
     except ValueError:
-        return jsonify(
-                {
-                    "error": "Artist id and album id must be an integer."
-                }
-            ), BAD_REQUEST
+        return id_error()
     except:
-        return jsonify(
-                {
-                    "error": "An internal error occurred."
-                }
-            ), INTERNAL_SERVER_ERROR
+        return internal_error()
     
 
 
@@ -122,11 +135,7 @@ def add_album(artist_id):
 
         data = request.get_json()
         if not data:
-            return jsonify(
-                    {
-                        "error": "Unsupported format of request."
-                    }
-                ), BAD_REQUEST
+            return no_data()
     
         name = data.get('name')
         album_type = data.get('type')
@@ -169,11 +178,7 @@ def add_album(artist_id):
         if result is None:
             cursor.close()
             connection.close()
-            return jsonify(
-                    {
-                        "error": "There is no artist with given artist id."
-                    }
-                ), NOT_FOUND
+            return no_artist()
 
         cursor.execute('''
                        INSERT INTO ALBUM (artist_id, name, `type`, release_date)
@@ -197,18 +202,9 @@ def add_album(artist_id):
                 }
             ), CREATED
     except ValueError:
-        return jsonify(
-                {
-                    "error": "Artist id must be an integer."
-                }
-            ), BAD_REQUEST
-    except Exception as e:
-        return jsonify(
-                {
-                    "error": "An internal error occurred."
-                }
-            ), INTERNAL_SERVER_ERROR
-    
+        return id_error()
+    except:
+        return internal_error()
 
 
 @albums_bp.route('/albums/<album_id>', methods=['PUT'])
@@ -219,11 +215,7 @@ def update_album(artist_id, album_id):
 
         data = request.get_json()        
         if not data:
-            return jsonify(
-                    {
-                        "error": "Unsupported format of request."
-                    }
-                ), BAD_REQUEST
+            return no_data()
 
         name = data.get('name')
         album_type = data.get('type')
@@ -266,11 +258,7 @@ def update_album(artist_id, album_id):
         if result is None:
             cursor.close()
             connection.close()
-            return jsonify(
-                    {
-                        "error": "There is no artist with given artist id."
-                    }
-                ), NOT_FOUND
+            return no_artist()
 
         cursor.execute(f'''
                        SELECT * 
@@ -284,11 +272,7 @@ def update_album(artist_id, album_id):
         if result is None:
             cursor.close()
             connection.close()
-            return jsonify(
-                    {
-                        "error": "There is no such album associated with given artist id."
-                    }
-                ), NOT_FOUND
+            return no_album()
 
         cursor.execute(f'''
                        UPDATE ALBUM
@@ -313,17 +297,9 @@ def update_album(artist_id, album_id):
                 }
             ), OK
     except ValueError:
-        return jsonify(
-                {
-                    "error": "Artist id and album id must be an integer."
-                }
-            ), BAD_REQUEST
-    except Exception as e:
-        return jsonify(
-                {
-                    "error": f"An internal error occurred. {e}"
-                }
-            ), INTERNAL_SERVER_ERROR
+        return id_error()
+    except:
+        return internal_error()
     
 
 
@@ -335,11 +311,7 @@ def modify_album(artist_id, album_id):
 
         data = request.get_json()        
         if not data:
-            return jsonify(
-                    {
-                        "error": "Unsupported format of request."
-                    }
-                ), BAD_REQUEST
+            return no_data()
 
         name = data.get('name')
         album_type = data.get('type')
@@ -358,16 +330,12 @@ def modify_album(artist_id, album_id):
         cursor.execute(f'''
                        SELECT * FROM ARTIST WHERE id = {artist_id};
                        ''')
-        result = cursor.fetchone()
+        artist = cursor.fetchone()
 
-        if result is None:
+        if artist is None:
             cursor.close()
             connection.close()
-            return jsonify(
-                    {
-                        "error": "There is no artist with given artist id."
-                    }
-                ), NOT_FOUND
+            return no_artist()
     
         cursor.execute(f'''
                        SELECT * 
@@ -376,16 +344,12 @@ def modify_album(artist_id, album_id):
                        ON album.artist_id = artist.id
                        WHERE album.id = {album_id};
                        ''')
-        result = cursor.fetchone()
+        album = cursor.fetchone()
 
-        if result is None:
+        if album is None:
             cursor.close()
             connection.close()
-            return jsonify(
-                    {
-                        "error": "There is no such album associated with given artist id."
-                    }
-                ), NOT_FOUND
+            return no_album()
         
         if not name and not album_type and not release_date:
             cursor.close()
@@ -421,17 +385,9 @@ def modify_album(artist_id, album_id):
             ), OK
 
     except ValueError:
-        return jsonify(
-                {
-                    "error": "Artist id and album id must be an integer."
-                }
-            ), BAD_REQUEST
+        return id_error()
     except:
-        return jsonify(
-                {
-                    "error": "An internal error occurred."
-                }
-            ), INTERNAL_SERVER_ERROR
+        return internal_error()
     
 @albums_bp.route('/albums/<album_id>', methods=['DELETE'])
 def delete_album(artist_id, album_id):
@@ -452,11 +408,7 @@ def delete_album(artist_id, album_id):
         if result is None:
             cursor.close()
             connection.close()
-            return jsonify(
-                    {
-                        "error": "There is no artist with given artist id."
-                    }
-                ), NOT_FOUND
+            return no_artist()
     
         cursor.execute(f'''
                        SELECT * 
@@ -470,11 +422,7 @@ def delete_album(artist_id, album_id):
         if result is None:
             cursor.close()
             connection.close()
-            return jsonify(
-                    {
-                        "error": "There is no such album associated with given artist id."
-                    }
-                ), NOT_FOUND
+            return no_album()
         
         cursor.execute(f'''
                        DELETE FROM ALBUM
@@ -491,14 +439,6 @@ def delete_album(artist_id, album_id):
             ), OK
 
     except ValueError:
-        return jsonify(
-                {
-                    "error": "Artist id and album id must be an integer."
-                }
-            ), BAD_REQUEST
+        return id_error()
     except:
-        return jsonify(
-                {
-                    "error": "An internal error occurred."
-                }
-            ), INTERNAL_SERVER_ERROR
+        return internal_error()
