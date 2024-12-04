@@ -6,12 +6,8 @@ If you have a data set, you can put them into a folder called "data" in order fo
 
 To run the project, you need to have docker installed to run the project. The server and the database are configured to run in containers. 
 
-The `docker-compose.yaml` file handles all of the running configurations. Thus, the only command to run the project is indicated below. The flag "-d" is for running the task in the background.
-```sh
-docker-compose up -d 
-```
+The `docker-compose.yaml` file handles all of the running configurations. Thus, the only command to run the project is indicated below. The flag "-d" is for running the task in the background. The flag "--build" is -at this state of the project- for building the Python app.
 
-If it does not work, try the following before running `docker-compose up -d`
 ```sh
-docker-compose build app
+docker-compose up -d --build 
 ```
