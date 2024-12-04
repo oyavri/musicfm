@@ -4,13 +4,14 @@ from database import db
 
 from resources.artists import artists_bp
 from resources.albums import albums_bp
+from resources.tracks import tracks_bp
 
 app = Flask(__name__)
 app.logger.setLevel(logging.ERROR)
 app.url_map.strict_slashes = False
 app.json.ensure_ascii = False # due to turkish characters
 
-
+artists_bp.register_blueprint(tracks_bp)
 artists_bp.register_blueprint(albums_bp)
 app.register_blueprint(artists_bp, url_prefix="/")
 
