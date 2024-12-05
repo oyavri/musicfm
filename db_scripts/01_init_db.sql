@@ -40,7 +40,7 @@ create table TRACK (
 create table USER (
     id int auto_increment,
     nickname varchar(255) not null,
-    email varchar(255) not null check(email like '%@%' and length(email) > 5),
+    email varchar(255) not null check(email like '_%@_%' and length(email) > 5),
     created_at datetime default now(),
     gender char(1) check(gender like 'F' or gender like 'M' or gender = null),
 
