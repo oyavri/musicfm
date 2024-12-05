@@ -48,9 +48,9 @@ def get_artists():
         cursor.execute(f'''
                        SELECT * FROM ARTIST;
                        ''')
-        users = cursor.fetchall()
+        artists = cursor.fetchall()
 
-        if not users:
+        if not artists:
             return jsonify(
                 {
                     "message": "There is no artist in the database."
@@ -59,7 +59,7 @@ def get_artists():
 
         cursor.close()
         connection.close()
-        return jsonify(users), OK
+        return jsonify(artists), OK
     
     except:
         return internal_error()
@@ -174,7 +174,7 @@ def update_artist(artist_id):
 
         cursor.execute(f'''
                        SELECT * FROM ARTIST 
-                       WHERE id={artist_id};
+                       WHERE id = {artist_id};
                        ''')
         artist = cursor.fetchone()
 
@@ -225,7 +225,7 @@ def modify_artist(artist_id):
 
         cursor.execute(f'''
                        SELECT * FROM ARTIST 
-                       WHERE id={artist_id};
+                       WHERE id = {artist_id};
                        ''')
         artist = cursor.fetchone()
 
@@ -280,7 +280,7 @@ def delete_artist(artist_id):
 
         cursor.execute(f'''
                        SELECT * FROM ARTIST 
-                       WHERE id={artist_id};
+                       WHERE id = {artist_id};
                        ''')
         artist = cursor.fetchone()
 
