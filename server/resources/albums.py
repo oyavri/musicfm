@@ -21,21 +21,21 @@ def is_valid_date(date):
 def no_artist():
     return jsonify(
             {
-                "error": "There is no artist with given artist id."
+                "error": "There is no artist with given artist ID."
             }
         ), NOT_FOUND
     
 def no_album():
     return jsonify(
                     {
-                        "error": "There is no such album associated with given artist id."
+                        "error": "There is no such album associated with given artist ID."
                     }
                 ), NOT_FOUND
 
 def id_error():
     return jsonify(
                 {
-                    "error": "Artist id and album id must be an integer."
+                    "error": "Artist ID and album ID must be an integer."
                 }
             ), BAD_REQUEST
 
@@ -84,7 +84,7 @@ def get_albums(artist_id):
     except ValueError:
         return jsonify(
                 {
-                    "error": "Artist id must be an integer."
+                    "error": "Artist ID must be an integer."
                 }
             ), BAD_REQUEST
     except:
@@ -102,7 +102,8 @@ def get_album(artist_id, album_id):
         cursor = connection.cursor(dictionary=True)
 
         cursor.execute(f'''
-                       SELECT * FROM ARTIST WHERE id = {artist_id};
+                       SELECT * FROM ARTIST 
+                       WHERE id = {artist_id};
                        ''')
         result = cursor.fetchone()
 
@@ -327,7 +328,7 @@ def modify_album(artist_id, album_id):
         if not is_valid_date(release_date):
             return jsonify(
                     {
-                        "error": "\"release_date\" field must be in the format of \"YYYY-MM-DD\""
+                        "error": "\"release_date\" field must be in the format of \"YYYY-MM-DD\"."
                     }
                 ), BAD_REQUEST
         
@@ -418,8 +419,7 @@ def delete_album(artist_id, album_id):
             return no_artist()
     
         cursor.execute(f'''
-                       SELECT * 
-                       FROM ALBUM AS album
+                       SELECT * FROM ALBUM AS album
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = {album_id};
