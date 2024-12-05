@@ -12,44 +12,75 @@ db = db()
 
 def id_error():
     return jsonify(
-            {
-                "error": "Artist id must be an integer"
-            }
-        ), BAD_REQUEST
+        {
+            "error": "The IDs of track, "
+        }
+    ), BAD_REQUEST
 
 def internal_error():
     return jsonify(
-                {
-                    "error": "An internal error occurred."
-                }
-            ), INTERNAL_SERVER_ERROR
+        {
+            "error": "An internal error occurred."
+        }
+    ), INTERNAL_SERVER_ERROR
 
 def no_artist():
     return jsonify(
-                    {
-                        "error": "There is no such artist with given id."
-                    }
-                ), NOT_FOUND
+        {
+            "error": "There is no artist associated with given ID."
+        }
+    ), NOT_FOUND
 
 def no_album():
     return jsonify(
-                    {
-                        "error": "There is no such artist with given id."
-                    }
-                ), NOT_FOUND
+        {
+            "error": "There is no album associated with given artist."
+        }
+    ), NOT_FOUND
+
+def no_track():
+    return jsonify(
+        {
+            "error": "There is no track associated with given album"
+        }
+    )
 
 def no_data():
     return jsonify(
-            {
-                "error": "Unsopported format of request"
-            }
-        ), BAD_REQUEST
+        {
+            "error": "Unsopported format of request"
+        }
+    ), BAD_REQUEST
 
 @tracks_bp.route('/tracks', methods=['GET'])
 def get_tracks(artist_id, album_id):
     try:
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
+
+        cursor.execute(f'''
+                       SELECT * FROM ARTIST
+                       WHERE id = {artist_id};
+                       ''')
+        artist = cursor.fetchone()
+
+        if artist is None:
+            cursor.close()
+            connection.close()
+            return no_artist()
+        
+        cursor.execute(f'''
+                       SELECT * FROM ALBUM AS album
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id};
+                       ''')
+        album = cursor.fetchone()
+
+        if album is None:
+            cursor.close()
+            connection.close()
+            return no_album()
 
         cursor.execute(f'''
                        SELECT track.id, track.name FROM TRACK AS track
@@ -64,7 +95,7 @@ def get_tracks(artist_id, album_id):
         if not results:
             cursor.close()
             connection.close()
-            return jsonify
+            return no_track()
 
         cursor.close()
         connection.close()
