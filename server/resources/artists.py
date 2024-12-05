@@ -48,9 +48,9 @@ def get_artists():
         cursor.execute(f'''
                        SELECT * FROM ARTIST;
                        ''')
-        results = cursor.fetchall()
+        users = cursor.fetchall()
 
-        if not results:
+        if not users:
             return jsonify(
                 {
                     "message": "There is no artist in the database."
@@ -59,7 +59,7 @@ def get_artists():
 
         cursor.close()
         connection.close()
-        return jsonify(results), OK
+        return jsonify(users), OK
     except:
         return internal_error()
 
@@ -75,16 +75,16 @@ def get_artist(artist_id):
                        SELECT * FROM ARTIST 
                        WHERE id = {artist_id};
                        ''')
-        result = cursor.fetchone()
+        artist = cursor.fetchone()
 
-        if result is None:
+        if artist is None:
             cursor.close()
             connection.close()
             return no_artist()
         
         cursor.close()
         connection.close()
-        return jsonify(result), OK
+        return jsonify(artist), OK
     except ValueError:
         return id_error()
     except:
@@ -155,9 +155,9 @@ def update_artist(artist_id):
                        SELECT * FROM ARTIST 
                        WHERE id={artist_id};
                        ''')
-        results = cursor.fetchone()
+        artist = cursor.fetchone()
 
-        if results is None:
+        if artist is None:
             cursor.close()
             connection.close()
             return no_artist()
@@ -204,9 +204,9 @@ def modify_artist(artist_id):
                        SELECT * FROM ARTIST 
                        WHERE id={artist_id};
                        ''')
-        result = cursor.fetchone()
+        artist = cursor.fetchone()
 
-        if result is None:
+        if artist is None:
             cursor.close()
             connection.close()
             return no_artist()
@@ -258,9 +258,9 @@ def delete_artist(artist_id):
                        SELECT * FROM ARTIST 
                        WHERE id={artist_id};
                        ''')
-        result = cursor.fetchone()
+        artist = cursor.fetchone()
 
-        if result is None:
+        if artist is None:
             cursor.close()
             connection.close()
             return no_artist()
