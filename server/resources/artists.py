@@ -12,31 +12,31 @@ db = db()
 
 def id_error():
     return jsonify(
-            {
-                "error": "Artist ID must be an integer."
-            }
-        ), BAD_REQUEST
+        {
+            "error": "Artist ID must be an integer."
+        }
+    ), BAD_REQUEST
 
 def internal_error():
     return jsonify(
-                {
-                    "error": "An internal error occurred."
-                }
-            ), INTERNAL_SERVER_ERROR
+        {
+            "error": "An internal error occurred."
+        }
+    ), INTERNAL_SERVER_ERROR
 
 def no_artist():
     return jsonify(
-                    {
-                        "error": "There is no such artist with given ID."
-                    }
-                ), NOT_FOUND
+        {
+            "error": "There is no such artist with given ID."
+        }
+    ), NOT_FOUND
 
 def no_data():
     return jsonify(
-            {
-                "error": "Unsopported format of request."
-            }
-        ), BAD_REQUEST
+        {
+            "error": "Unsopported format of request."
+        }
+    ), BAD_REQUEST
 
 
 @artists_bp.route('/artists', methods=['GET'])
@@ -60,6 +60,7 @@ def get_artists():
         cursor.close()
         connection.close()
         return jsonify(users), OK
+    
     except:
         return internal_error()
 
@@ -85,6 +86,7 @@ def get_artist(artist_id):
         cursor.close()
         connection.close()
         return jsonify(artist), OK
+    
     except ValueError:
         return id_error()
     except:
@@ -102,10 +104,17 @@ def add_artist():
         short_info = data.get('short_info')
 
         if not name:
-            return jsonify({"error": "\"name\" field of the artist must be provided."}), BAD_REQUEST
+            return jsonify(
+                {
+                    "error": "\"name\" field of the artist must be provided."
+                }
+            ), BAD_REQUEST
         if not short_info:
-            return jsonify({"error": "\"short_info\" field of the artist must be provided."}), BAD_REQUEST
-
+            return jsonify(
+                {
+                    "error": "\"short_info\" field of the artist must be provided."
+                }
+            ), BAD_REQUEST
         
         connection = db.connect()
         cursor = connection.cursor()
@@ -118,16 +127,20 @@ def add_artist():
 
         cursor.close()
         connection.close()
-        
+
+        artist_id = cursor.lastrowid
+
         return jsonify(
             {
                 "message": "Artist added successfully.", 
                 "artist": {
-                    "id": cursor.lastrowid,
+                    "id": artist_id,
                     "name": name,
                     "short_info": short_info
                 }
-            }), CREATED
+            }
+        ), CREATED
+    
     except:
         return internal_error()
     
@@ -179,7 +192,9 @@ def update_artist(artist_id):
                     "name": name, 
                     "short_info": short_info
                 }
-            }), OK
+            }
+        ), OK
+    
     except ValueError:
         return id_error()
     except:
@@ -215,10 +230,10 @@ def modify_artist(artist_id):
             cursor.close()
             connection.close()
             return jsonify(
-                    {
-                        "error": "No modifiable field has been specified. Modifiable fields are: \"name\", \"short_info\"."
-                    }
-                ), BAD_REQUEST
+                {
+                    "error": "No modifiable field has been specified. Modifiable fields are: \"name\", \"short_info\"."
+                }
+            ), BAD_REQUEST
         
         cursor.execute(f'''
                         UPDATE ARTIST 
@@ -240,7 +255,9 @@ def modify_artist(artist_id):
                     "name": name, 
                     "short_info": short_info
                 }
-            }), OK
+            }
+        ), OK
+    
     except ValueError:
         return id_error()
     except:
@@ -275,10 +292,11 @@ def delete_artist(artist_id):
         connection.close()
 
         return jsonify(
-                {
-                    "message": "Artist deleted successfully."
-                }
-            ), OK
+            {
+                "message": "Artist deleted successfully."
+            }
+        ), OK
+    
     except ValueError:
         return id_error()
     except:
