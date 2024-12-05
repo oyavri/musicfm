@@ -13,7 +13,7 @@ db = db()
 def id_error():
     return jsonify(
             {
-                "error": "Artist id must be an integer"
+                "error": "Artist ID must be an integer."
             }
         ), BAD_REQUEST
 
@@ -27,14 +27,14 @@ def internal_error():
 def no_artist():
     return jsonify(
                     {
-                        "error": "There is no such artist with given id."
+                        "error": "There is no such artist with given ID."
                     }
                 ), NOT_FOUND
 
 def no_data():
     return jsonify(
             {
-                "error": "Unsopported format of request"
+                "error": "Unsopported format of request."
             }
         ), BAD_REQUEST
 
@@ -112,7 +112,7 @@ def add_artist():
         
         cursor.execute('''
                        INSERT INTO ARTIST (name, short_info) 
-                       VALUES (%s, %s)
+                       VALUES (%s, %s);
                        ''', (name, short_info))
         connection.commit()
 
@@ -153,7 +153,7 @@ def update_artist(artist_id):
 
         cursor.execute(f'''
                        SELECT * FROM ARTIST 
-                       WHERE id={artist_id}
+                       WHERE id={artist_id};
                        ''')
         results = cursor.fetchone()
 
@@ -165,7 +165,7 @@ def update_artist(artist_id):
         cursor.execute(f'''
                        UPDATE ARTIST 
                        SET name = "{name}", short_info = "{short_info}" 
-                       WHERE id = {artist_id}
+                       WHERE id = {artist_id};
                        ''')
         connection.commit()
 
@@ -202,7 +202,7 @@ def modify_artist(artist_id):
 
         cursor.execute(f'''
                        SELECT * FROM ARTIST 
-                       WHERE id={artist_id}
+                       WHERE id={artist_id};
                        ''')
         result = cursor.fetchone()
 
@@ -224,7 +224,7 @@ def modify_artist(artist_id):
                         UPDATE ARTIST 
                         SET {f"name = \"{name}\"," if name else ""}
                             {f"short_info = \"{short_info}\"" if short_info else ""} 
-                        WHERE id = {artist_id}
+                        WHERE id = {artist_id};
                         ''')
     
         connection.commit()
@@ -254,15 +254,21 @@ def delete_artist(artist_id):
         connection = db.connect()
         cursor = connection.cursor()
 
-        cursor.execute(f'SELECT * FROM ARTIST WHERE id={artist_id}')
+        cursor.execute(f'''
+                       SELECT * FROM ARTIST 
+                       WHERE id={artist_id};
+                       ''')
         result = cursor.fetchone()
 
         if result is None:
             cursor.close()
             connection.close()
-            return jsonify({"error": "Artist not found."}), NOT_FOUND
+            return no_artist()
         
-        cursor.execute(f'DELETE FROM ARTIST WHERE id = {artist_id}')
+        cursor.execute(f'''
+                       DELETE FROM ARTIST 
+                       WHERE id = {artist_id};
+                       ''')
         connection.commit()
 
         cursor.close()
