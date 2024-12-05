@@ -157,9 +157,17 @@ def update_artist(artist_id):
         short_info = data.get('short_info')
 
         if not name:
-            return jsonify({"error": "\"name\" field of the artist must be provided."}), BAD_REQUEST
+            return jsonify(
+                {
+                    "error": "\"name\" field of the artist must be provided."
+                }
+            ), BAD_REQUEST
         if not short_info:
-            return jsonify({"error": "\"short_info\" field of the artist must be provided."}), BAD_REQUEST
+            return jsonify(
+                {
+                    "error": "\"short_info\" field of the artist must be provided."
+                }
+            ), BAD_REQUEST
 
         connection = db.connect()
         cursor = connection.cursor()
