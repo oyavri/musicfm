@@ -50,6 +50,13 @@ def get_artists():
                        ''')
         results = cursor.fetchall()
 
+        if not results:
+            return jsonify(
+                {
+                    "message": "There is no artist in the database."
+                }
+            ), OK
+
         cursor.close()
         connection.close()
         return jsonify(results), OK

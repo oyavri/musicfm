@@ -95,7 +95,11 @@ def get_tracks(artist_id, album_id):
         if not results:
             cursor.close()
             connection.close()
-            return no_track()
+            return jsonify(
+                {
+                    "message": "There is no track in the given album."
+                }
+            ), OK
 
         cursor.close()
         connection.close()
