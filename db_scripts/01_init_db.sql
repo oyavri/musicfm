@@ -45,12 +45,14 @@ create table USER (
     gender char(1) check(gender like 'F' or gender like 'M' or gender = null),
 
     primary key (id)
+    unique (email)
 );
 
 create table USER_LIKE (
     user_id int,
     track_id int,
 
+    primary key (user_id, track_id) -- a track cannot be liked twice
     foreign key (user_id) references USER (id)
         on delete cascade
         on update cascade, -- check validity
@@ -64,6 +66,7 @@ create table RATE (
     track_id int,
     rate smallint check (rate > 0 and rate <= 5),
 
+    primary key (user_id, track_id) -- a track cannot be rated twice
     foreign key (user_id) references USER (id)
         on delete cascade
         on update cascade, -- check validity
