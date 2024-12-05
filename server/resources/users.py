@@ -354,7 +354,7 @@ def delete_user(user_id):
         user_id = int(user_id)
 
         connection = db.connect()
-        cursor = connection.cursor()
+        cursor = connection.cursor(dictionary=True)
 
         cursor.execute(f'''
                        SELECT * FROM USER 

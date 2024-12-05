@@ -119,7 +119,7 @@ def add_artist():
             ), BAD_REQUEST
         
         connection = db.connect()
-        cursor = connection.cursor()
+        cursor = connection.cursor(dictionary=True)
         
         cursor.execute('''
                        INSERT INTO ARTIST (name, short_info) 
@@ -172,7 +172,7 @@ def update_artist(artist_id):
             ), BAD_REQUEST
 
         connection = db.connect()
-        cursor = connection.cursor()
+        cursor = connection.cursor(dictionary=True)
 
         cursor.execute(f'''
                        SELECT * FROM ARTIST 
@@ -223,7 +223,7 @@ def modify_artist(artist_id):
         short_info = data.get('short_info')
 
         connection = db.connect()
-        cursor = connection.cursor()
+        cursor = connection.cursor(dictionary=True)
 
         cursor.execute(f'''
                        SELECT * FROM ARTIST 
@@ -278,7 +278,7 @@ def delete_artist(artist_id):
         artist_id = int(artist_id)
 
         connection = db.connect()
-        cursor = connection.cursor()
+        cursor = connection.cursor(dictionary=True)
 
         cursor.execute(f'''
                        SELECT * FROM ARTIST 
