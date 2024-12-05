@@ -197,12 +197,14 @@ def add_album(artist_id):
         cursor.close()
         connection.close()
 
+        album_id = cursor.lastrowid
+
         return jsonify(
                 {
                     "message": "Album added successfully.", 
                     "album": { 
                         "artist_id": artist_id, 
-                        "id": cursor.lastrowid, 
+                        "id": album_id, 
                         "name": name, 
                         "type": album_type,
                         "release_date": release_date
