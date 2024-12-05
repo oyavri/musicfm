@@ -241,7 +241,6 @@ def modify_artist(artist_id):
                             {f"short_info = \"{short_info}\"" if short_info else ""} 
                         WHERE id = {artist_id};
                         ''')
-    
         connection.commit()
 
         cursor.close()
