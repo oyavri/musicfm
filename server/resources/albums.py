@@ -69,9 +69,9 @@ def get_albums(artist_id):
                        ON album.artist_id = artist.id 
                        WHERE artist_id = {artist_id};
                        ''')
-        results = cursor.fetchall()
+        albums = cursor.fetchall()
 
-        if not results:
+        if not albums:
             return jsonify(
                 {
                     "message": "There is no album of given artist."
@@ -80,7 +80,7 @@ def get_albums(artist_id):
 
         cursor.close()
         connection.close()
-        return jsonify(results), OK
+        return jsonify(albums), OK
     except ValueError:
         return jsonify(
                 {
@@ -105,9 +105,9 @@ def get_album(artist_id, album_id):
                        SELECT * FROM ARTIST 
                        WHERE id = {artist_id};
                        ''')
-        result = cursor.fetchone()
+        artist = cursor.fetchone()
 
-        if result is None:
+        if artist is None:
             cursor.close()
             connection.close()
             return no_artist()
@@ -119,16 +119,16 @@ def get_album(artist_id, album_id):
                         ON album.artist_id = artist.id 
                         WHERE album.artist_id = {artist_id} and album.id = {album_id};
                         ''')
-        result = cursor.fetchone()
+        album = cursor.fetchone()
 
-        if result is None:
+        if album is None:
             cursor.close()
             connection.close()
             return no_album()
         
         cursor.close()
         connection.close()
-        return jsonify(result), OK
+        return jsonify(album), OK
     except ValueError:
         return id_error()
     except:
@@ -176,14 +176,14 @@ def add_album(artist_id):
                 ), BAD_REQUEST
 
         connection = db.connect()
-        cursor = connection.cursor()
+        cursor = connection.cursor(dictionary=True)
 
         cursor.execute(f'''
                        SELECT * FROM ARTIST WHERE id = {artist_id};
                        ''')
-        result = cursor.fetchone()
+        artist = cursor.fetchone()
 
-        if result is None:
+        if artist is None:
             cursor.close()
             connection.close()
             return no_artist()
@@ -256,14 +256,14 @@ def update_album(artist_id, album_id):
                 ), BAD_REQUEST
         
         connection = db.connect()
-        cursor = connection.cursor()
+        cursor = connection.cursor(dictionary=True)
 
         cursor.execute(f'''
                        SELECT * FROM ARTIST WHERE id = {artist_id};
                        ''')
-        result = cursor.fetchone()
+        artist = cursor.fetchone()
 
-        if result is None:
+        if artist is None:
             cursor.close()
             connection.close()
             return no_artist()
@@ -275,9 +275,9 @@ def update_album(artist_id, album_id):
                        ON album.artist_id = artist.id
                        WHERE album.id = {album_id};
                        ''')
-        result = cursor.fetchone()
+        album = cursor.fetchone()
 
-        if result is None:
+        if album is None:
             cursor.close()
             connection.close()
             return no_album()
@@ -340,7 +340,7 @@ def modify_album(artist_id, album_id):
                 ), BAD_REQUEST
         
         connection = db.connect()
-        cursor = connection.cursor()
+        cursor = connection.cursor(dictionary=True)
 
         cursor.execute(f'''
                        SELECT * FROM ARTIST WHERE id = {artist_id};
@@ -373,6 +373,7 @@ def modify_album(artist_id, album_id):
                             {f"release_date = \"{release_date}\"" if release_date else ""}
                         WHERE id = {album_id};
                         ''')
+        connection.commit()
 
         cursor.close()
         connection.close()
@@ -402,16 +403,16 @@ def delete_album(artist_id, album_id):
         album_id = int(album_id)
 
         connection = db.connect()
-        cursor = connection.cursor()
+        cursor = connection.cursor(dictionary=True)
 
         # this check of existance of artist and existance of album of given artist 
         # has been all around the api, should be a function. 
         cursor.execute(f'''
                        SELECT * FROM ARTIST WHERE id = {artist_id};
                        ''')
-        result = cursor.fetchone()
+        artist = cursor.fetchone()
 
-        if result is None:
+        if artist is None:
             cursor.close()
             connection.close()
             return no_artist()
@@ -422,9 +423,9 @@ def delete_album(artist_id, album_id):
                        ON album.artist_id = artist.id
                        WHERE album.id = {album_id};
                        ''')
-        result = cursor.fetchone()
+        album = cursor.fetchone()
 
-        if result is None:
+        if album is None:
             cursor.close()
             connection.close()
             return no_album()
@@ -433,6 +434,7 @@ def delete_album(artist_id, album_id):
                        DELETE FROM ALBUM
                        WHERE id = {album_id};
                        ''')
+        connection.commit()
 
         cursor.close()
         connection.close()
