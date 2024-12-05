@@ -325,6 +325,13 @@ def modify_album(artist_id, album_id):
         album_type = data.get('type')
         release_date = data.get('release_date')
 
+        if not name and not album_type and not release_date:
+            return jsonify(
+                    {
+                        "error": "No modifiable field has been specified. Modifiable fields are: \"name\", \"type\" and \"release_date\"."
+                    }
+                ), BAD_REQUEST
+
         if not is_valid_date(release_date):
             return jsonify(
                     {
@@ -358,15 +365,6 @@ def modify_album(artist_id, album_id):
             cursor.close()
             connection.close()
             return no_album()
-        
-        if not name and not album_type and not release_date:
-            cursor.close()
-            connection.close()
-            return jsonify(
-                    {
-                        "error": "No modifiable field has been specified. Modifiable fields are: \"name\", \"type\" and \"release_date\"."
-                    }
-                ), BAD_REQUEST
         
         cursor.execute(f'''
                         UPDATE ALBUM
