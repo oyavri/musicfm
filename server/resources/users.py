@@ -61,6 +61,8 @@ def get_users():
         users = cursor.fetchall()
 
         if not users:
+            cursor.close()
+            connection.close()
             return jsonify(
                 {
                     "message": "There is no user in the database."
@@ -328,7 +330,7 @@ def modify_user(user_id):
 
         cursor.close()
         connection.close()
-        
+
         return jsonify(
             {
                 "message": "User updated successfully",
