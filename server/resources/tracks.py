@@ -43,7 +43,7 @@ def no_track():
         {
             "error": "There is no track associated with given album"
         }
-    )
+    ), NOT_FOUND
 
 def no_data():
     return jsonify(
