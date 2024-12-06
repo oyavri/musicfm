@@ -5,6 +5,7 @@ OK = 200
 CREATED = 201
 BAD_REQUEST = 400
 NOT_FOUND = 404
+CONFLICT = 409
 INTERNAL_SERVER_ERROR = 500
 
 tracks_bp = Blueprint('tracks', __name__, url_prefix="/artists/<artist_id>/albums/<album_id>")
@@ -23,6 +24,20 @@ def id_error():
             "error": "Artist ID, album ID and track ID must be an integer."
         }
     ), BAD_REQUEST
+
+def id_error_including_user():
+    return jsonify(
+        {
+            "error": "Artist ID, album ID, track ID, and user ID must be an integer."
+        }
+    )
+
+def id_error_including_user_and_rate():
+    return jsonify(
+        {
+            "error": "Artist ID, album ID, track ID, user ID, and rate must be an integer."
+        }
+    )
 
 def internal_error():
     return jsonify(
@@ -49,6 +64,20 @@ def no_track():
     return jsonify(
         {
             "error": "There is no track associated with given album."
+        }
+    ), NOT_FOUND
+
+def no_user():
+    return jsonify(
+        {
+            "error": "There is no such user with given ID."
+        }
+    ), NOT_FOUND
+
+def no_like():
+    return jsonify(
+        {
+            "error": "User has not liked such track with given ID."
         }
     ), NOT_FOUND
 
@@ -479,6 +508,7 @@ def delete_track(artist_id, album_id, track_id):
         artist_id = int(artist_id)
         album_id = int(album_id)
         track_id = int(track_id)
+
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
@@ -535,5 +565,731 @@ def delete_track(artist_id, album_id, track_id):
 
     except ValueError:
         return id_error()
+    except:
+        return internal_error()
+    
+## LIKE PART ##
+
+@tracks_bp.route('/tracks/<track_id>/likes', methods=['GET'])
+def get_likes_of_track(artist_id, album_id, track_id):
+    try:
+        artist_id = int(artist_id)
+        album_id = int(album_id)
+        track_id = int(track_id)
+
+        connection = db.connect()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute(f'''
+                       SELECT * FROM ARTIST
+                       WHERE id = {artist_id};
+                       ''')
+        artist = cursor.fetchone()
+
+        if artist is None:
+            cursor.close()
+            connection.close()
+            return no_artist()
+
+        cursor.execute(f'''
+                       SELECT * FROM ALBUM AS album
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id};
+                       ''')
+        album = cursor.fetchone()
+
+        if album is None:
+            cursor.close()
+            connection.close()
+            return no_album()
+        
+        cursor.execute(f'''
+                       SELECT * FROM TRACK AS track
+                       JOIN ALBUM AS album
+                       ON track.album_id = album.id
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id} AND track.id = {track_id};
+                       ''')
+        track = cursor.fetchone()
+
+        if track is None:
+            cursor.close()
+            connection.close()
+            return no_track()
+        
+        cursor.execute(f'''
+                       SELECT user.id, user.nickname FROM USER AS user
+                       JOIN USER_LIKE AS user_like
+                       ON user.id = user_like.user_id
+                       WHERE user_like.track_id = {track_id};
+                       ''')
+        likes = cursor.fetchall()
+
+        if not likes:
+            cursor.close()
+            connection.close()
+            return jsonify(
+                {
+                    "message": "No user has liked this track yet."
+                }
+            ), OK
+        
+        cursor.close()
+        connection.close()
+
+        return jsonify(likes), OK
+    
+    except ValueError:
+        return id_error()
+    except:
+        return internal_error()
+
+@tracks_bp.route('/tracks/<track_id>/likes', methods=['POST'])
+def like_track(artist_id, album_id, track_id):
+    try:
+        artist_id = int(artist_id)
+        album_id = int(album_id)
+        track_id = int(track_id)
+
+        data = request.get_json()
+        if not data:
+            return no_data()
+        
+        user_id = data.get('user_id')
+        user_id = int(user_id)
+
+        connection = db.connect()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute(f'''
+                       SELECT * FROM ARTIST
+                       WHERE id = {artist_id};
+                       ''')
+        artist = cursor.fetchone()
+
+        if artist is None:
+            cursor.close()
+            connection.close()
+            return no_artist()
+
+        cursor.execute(f'''
+                       SELECT * FROM ALBUM AS album
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id};
+                       ''')
+        album = cursor.fetchone()
+
+        if album is None:
+            cursor.close()
+            connection.close()
+            return no_album()
+        
+        cursor.execute(f'''
+                       SELECT * FROM TRACK AS track
+                       JOIN ALBUM AS album
+                       ON track.album_id = album.id
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id} AND track.id = {track_id};
+                       ''')
+        track = cursor.fetchone()
+
+        if track is None:
+            cursor.close()
+            connection.close()
+            return no_track()
+        
+        cursor.execute(f'''
+                       SELECT * FROM USER 
+                       WHERE id = {user_id};
+                       ''')
+        user = cursor.fetchone()
+
+        if user is None:
+            cursor.close()
+            connection.close()
+            return no_user()
+        
+        cursor.execute(f'''
+                       SELECT * FROM USER_LIKE 
+                       WHERE user_id = {user_id} AND track_id = {track_id};
+                       ''')
+        like = cursor.fetchone()
+
+        if like is not None:
+            cursor.close()
+            connection.close()
+            return jsonify(
+                {
+                    "error": "User has already liked this track."
+                }
+            ), CONFLICT
+
+        cursor.execute('''
+                       INSERT INTO USER_LIKE (user_id, track_id) 
+                       VALUES (%s, %s);
+                       ''', (user_id, track_id))
+        cursor.commit()
+
+        cursor.close()
+        connection.close()
+
+        return jsonify(
+            {
+                "message": "Track liked successfully."
+            }
+        ), OK
+    
+    except ValueError:
+        return id_error_including_user()
+    except:
+        return internal_error()
+    
+@tracks_bp.route('/tracks/<track_id>/likes', methods=['DELETE'])
+def unlike_track(artist_id, album_id, track_id):
+    try:
+        artist_id = int(artist_id)
+        album_id = int(album_id)
+        track_id = int(track_id)
+
+        data = request.get_json()
+        if not data:
+            return no_data()
+        
+        user_id = data.get('user_id')
+        if not user_id:
+            return jsonify(
+                {
+                    "error": "\"user_id\" must be provided."
+                }
+            ), BAD_REQUEST
+        
+        user_id = int(user_id)
+
+        connection = db.connect()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute(f'''
+                       SELECT * FROM ARTIST
+                       WHERE id = {artist_id};
+                       ''')
+        artist = cursor.fetchone()
+
+        if artist is None:
+            cursor.close()
+            connection.close()
+            return no_artist()
+
+        cursor.execute(f'''
+                       SELECT * FROM ALBUM AS album
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id};
+                       ''')
+        album = cursor.fetchone()
+
+        if album is None:
+            cursor.close()
+            connection.close()
+            return no_album()
+        
+        cursor.execute(f'''
+                       SELECT * FROM TRACK AS track
+                       JOIN ALBUM AS album
+                       ON track.album_id = album.id
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id} AND track.id = {track_id};
+                       ''')
+        track = cursor.fetchone()
+
+        if track is None:
+            cursor.close()
+            connection.close()
+            return no_track()
+        
+        cursor.execute(f'''
+                       SELECT * FROM USER 
+                       WHERE id = {user_id};
+                       ''')
+        user = cursor.fetchone()
+
+        if user is None:
+            cursor.close()
+            connection.close()
+            return no_user()
+        
+        cursor.execute(f'''
+                       SELECT * FROM USER_LIKE
+                       WHERE user_id = {user_id} AND track_id = {track_id};
+                       ''')
+        like = cursor.fetchone()
+
+        if like is None:
+            cursor.close()
+            connection.close()
+            return no_like()
+        
+        cursor.execute(f'''
+                       DELETE FROM USER_LIKE
+                       WHERE user_id = {user_id} AND track_id = {track_id}
+                       ''')
+        cursor.commit()
+
+        cursor.close()
+        connection.close()
+
+        return jsonify(
+            {
+                "message": "Track unliked successfully."
+            }
+        ), OK
+    
+    except ValueError:
+        return id_error_including_user()
+    except:
+        return internal_error()
+
+
+## RATE PART ##
+
+@tracks_bp.route('/tracks/<track_id>/rates', methods=['GET'])
+def get_rates_of_track(artist_id, album_id, track_id):
+    try:
+        artist_id = int(artist_id)
+        album_id = int(album_id)
+        track_id = int(track_id)
+
+        connection = db.connect()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute(f'''
+                       SELECT * FROM ARTIST
+                       WHERE id = {artist_id};
+                       ''')
+        artist = cursor.fetchone()
+
+        if artist is None:
+            cursor.close()
+            connection.close()
+            return no_artist()
+
+        cursor.execute(f'''
+                       SELECT * FROM ALBUM AS album
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id};
+                       ''')
+        album = cursor.fetchone()
+
+        if album is None:
+            cursor.close()
+            connection.close()
+            return no_album()
+        
+        cursor.execute(f'''
+                       SELECT * FROM TRACK AS track
+                       JOIN ALBUM AS album
+                       ON track.album_id = album.id
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id} AND track.id = {track_id};
+                       ''')
+        track = cursor.fetchone()
+
+        if track is None:
+            cursor.close()
+            connection.close()
+            return no_track()
+        
+        cursor.execute(f'''
+                       SELECT user.id, user.nickname, rate.rate FROM USER AS user
+                       JOIN RATE AS rate
+                       ON user.id = rate.user_id 
+                       WHERE track_id = {track_id};
+                       ''')
+        rates = cursor.fetchall()
+
+        if not rates:
+            cursor.close()
+            connection.close()
+            return jsonify(
+                {
+                    "message": "No user has rated this track yet."
+                }
+            ), OK
+        
+        cursor.close()
+        connection.close()
+
+        return jsonify(rates), OK
+    
+    except ValueError:
+        return id_error()
+    except:
+        return internal_error()
+
+@tracks_bp.route('/tracks/<track_id>/rates', methods=['POST'])
+def rate_track(artist_id, album_id, track_id):
+    try:
+        artist_id = int(artist_id)
+        album_id = int(album_id)
+        track_id = int(track_id)
+
+        data = request.get_json()
+        if not data:
+            return no_data()
+        
+        user_id = data.get('user_id')
+        if not user_id:
+            return jsonify(
+                {
+                    "error": "\"user_id\" must be provided."
+                }
+            ), BAD_REQUEST
+
+        user_id = int(user_id)
+
+        rate = data.get('rate')
+        if not rate:
+            return jsonify(
+                {
+                    "error": "\"rate\" must be provided."
+                }
+            ), BAD_REQUEST
+        
+        rate = int(rate)
+
+        if not (rate > 0 and  rate <= 5):
+            return jsonify(
+                {
+                    "error": "Rate must be an integer between 0 and 5, 5 included."
+                }
+            ), BAD_REQUEST
+
+        connection = db.connect()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute(f'''
+                       SELECT * FROM ARTIST
+                       WHERE id = {artist_id};
+                       ''')
+        artist = cursor.fetchone()
+
+        if artist is None:
+            cursor.close()
+            connection.close()
+            return no_artist()
+
+        cursor.execute(f'''
+                       SELECT * FROM ALBUM AS album
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id};
+                       ''')
+        album = cursor.fetchone()
+
+        if album is None:
+            cursor.close()
+            connection.close()
+            return no_album()
+        
+        cursor.execute(f'''
+                       SELECT * FROM TRACK AS track
+                       JOIN ALBUM AS album
+                       ON track.album_id = album.id
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id} AND track.id = {track_id};
+                       ''')
+        track = cursor.fetchone()
+
+        if track is None:
+            cursor.close()
+            connection.close()
+            return no_track()
+
+        cursor.execute(f'''
+                       SELECT * FROM USER 
+                       WHERE id = {user_id};
+                       ''')
+        user = cursor.fetchone()
+
+        if user is None:
+            cursor.close()
+            connection.close()
+            return no_user()
+        
+        cursor.execute(f'''
+                       SELECT * FROM RATE 
+                       WHERE user_id = {user_id} AND track_id = {track_id};
+                       ''')
+        rate = cursor.fetchone()
+
+        if rate is not None:
+            cursor.close()
+            connection.close()
+            return jsonify(
+                {
+                    "error": "User has already rated this track."
+                }
+            ), CONFLICT
+
+        cursor.execute('''
+                       INSERT INTO RATE (user_id, track_id, rate) 
+                       VALUES (%s, %s, %s);
+                       ''', (user_id, track_id, rate))
+        cursor.commit()
+
+        cursor.close()
+        connection.close()
+
+        return jsonify(
+            {
+                "message": "Track rated successfully."
+            }
+        ), OK
+
+    except ValueError:
+        return id_error_including_user_and_rate()
+    except:
+        return internal_error()
+
+@tracks_bp.route('/tracks/<track_id>/rates', methods=['PATCH'])
+def modify_rate(artist_id, album_id, track_id):
+    try:
+        artist_id = int(artist_id)
+        album_id = int(album_id)
+        track_id = int(track_id)
+
+        data = request.get_json()
+        if not data:
+            return no_data()
+        
+        user_id = data.get('user_id')
+        if not user_id:
+            return jsonify(
+                {
+                    "error": "\"user_id\" must be provided."
+                }
+            ), BAD_REQUEST
+        
+        user_id = int(user_id)
+
+        rate = data.get('rate')
+        if not rate:
+            return jsonify(
+                {
+                    "error": "\"rate\" must be provided."
+                }
+            ), BAD_REQUEST
+        
+        rate = int(rate)
+
+        if not (rate > 0 and  rate <= 5):
+            return jsonify(
+                {
+                    "error": "Rate must be an integer between 0 and 5, 5 included."
+                }
+            ), BAD_REQUEST
+
+        connection = db.connect()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute(f'''
+                       SELECT * FROM ARTIST
+                       WHERE id = {artist_id};
+                       ''')
+        artist = cursor.fetchone()
+
+        if artist is None:
+            cursor.close()
+            connection.close()
+            return no_artist()
+
+        cursor.execute(f'''
+                       SELECT * FROM ALBUM AS album
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id};
+                       ''')
+        album = cursor.fetchone()
+
+        if album is None:
+            cursor.close()
+            connection.close()
+            return no_album()
+        
+        cursor.execute(f'''
+                       SELECT * FROM TRACK AS track
+                       JOIN ALBUM AS album
+                       ON track.album_id = album.id
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id} AND track.id = {track_id};
+                       ''')
+        track = cursor.fetchone()
+
+        if track is None:
+            cursor.close()
+            connection.close()
+            return no_track()
+
+        cursor.execute(f'''
+                       SELECT * FROM USER 
+                       WHERE id = {user_id};
+                       ''')
+        user = cursor.fetchone()
+
+        if user is None:
+            cursor.close()
+            connection.close()
+            return no_user()
+        
+        cursor.execute(f'''
+                       SELECT * FROM RATE 
+                       WHERE user_id = {user_id} AND track_id = {track_id};
+                       ''')
+        rate = cursor.fetchone()
+
+        if rate is None:
+            cursor.close()
+            connection.close()
+            return jsonify(
+                {
+                    "error": "User has not rated this track yet."
+                }
+            ), BAD_REQUEST
+        
+        cursor.execute(f'''
+                       UPDATE RATE
+                       SET rate = {rate}
+                       WHERE user_id = {user_id} AND track_id = {track_id};
+                       ''')
+        cursor.commit()
+
+        cursor.close()
+        connection.close()
+
+        return jsonify(
+            {
+                "message": "Rate updated successfully."
+            }
+        ), OK
+
+    except ValueError:
+        return id_error_including_user_and_rate()
+    except:
+        return internal_error()
+
+@tracks_bp.route('/tracks/<track_id>/rates', methods=['DELETE'])
+def delete_rate(artist_id, album_id, track_id):
+    try:
+        artist_id = int(artist_id)
+        album_id = int(album_id)
+        track_id = int(track_id)
+
+        data = request.get_json()
+        if not data:
+            return no_data()
+        
+        user_id = data.get('user_id')
+        if not user_id:
+            return jsonify(
+                {
+                    "error": "\"user_id\" must be provided."
+                }
+            ), BAD_REQUEST
+        
+        user_id = int(user_id)
+
+        connection = db.connect()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute(f'''
+                       SELECT * FROM ARTIST
+                       WHERE id = {artist_id};
+                       ''')
+        artist = cursor.fetchone()
+
+        if artist is None:
+            cursor.close()
+            connection.close()
+            return no_artist()
+
+        cursor.execute(f'''
+                       SELECT * FROM ALBUM AS album
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id};
+                       ''')
+        album = cursor.fetchone()
+
+        if album is None:
+            cursor.close()
+            connection.close()
+            return no_album()
+        
+        cursor.execute(f'''
+                       SELECT * FROM TRACK AS track
+                       JOIN ALBUM AS album
+                       ON track.album_id = album.id
+                       JOIN ARTIST AS artist
+                       ON album.artist_id = artist.id
+                       WHERE album.id = {album_id} AND artist.id = {artist_id} AND track.id = {track_id};
+                       ''')
+        track = cursor.fetchone()
+
+        if track is None:
+            cursor.close()
+            connection.close()
+            return no_track()
+
+        cursor.execute(f'''
+                       SELECT * FROM USER 
+                       WHERE id = {user_id};
+                       ''')
+        user = cursor.fetchone()
+
+        if user is None:
+            cursor.close()
+            connection.close()
+            return no_user()
+        
+        cursor.execute(f'''
+                       SELECT * FROM RATE 
+                       WHERE user_id = {user_id} AND track_id = {track_id};
+                       ''')
+        rate = cursor.fetchone()
+
+        if rate is None:
+            cursor.close()
+            connection.close()
+            return jsonify(
+                {
+                    "error": "User has not rated this track yet."
+                }
+            ), BAD_REQUEST
+        
+        cursor.execute(f'''
+                       DELETE FROM RATE
+                       WHERE user_id = {user_id} AND track_id = {track_id};
+                       ''')
+        cursor.commit()
+
+        cursor.close()
+        connection.close()
+
+        return jsonify(
+            {
+                "message": "Rate deleted successfully."
+            }
+        ), OK
+
+    except ValueError:
+        return id_error_including_user_and_rate()
     except:
         return internal_error()
