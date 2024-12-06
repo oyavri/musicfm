@@ -21,8 +21,10 @@ class db:
                 "port":3306
         }
 
-        self.pool = mysql.connector.pooling.MySQLConnectionPool(**db_config)
-        pass
-    
+        self.pool = mysql.connector.pooling.MySQLConnectionPool(
+            pool_size= 10,
+            **db_config
+        )
+        
     def connect(self):
         return self.pool.get_connection()
