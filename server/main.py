@@ -6,6 +6,7 @@ from resources.artists import artists_bp
 from resources.albums import albums_bp
 from resources.tracks import tracks_bp
 from resources.users import users_bp
+from resources.playlists import playlists_bp
 
 app = Flask(__name__)
 app.logger.setLevel(logging.ERROR)
@@ -14,6 +15,7 @@ app.json.ensure_ascii = False # due to turkish characters
 
 artists_bp.register_blueprint(tracks_bp)
 artists_bp.register_blueprint(albums_bp)
+users_bp.register_blueprint(playlists_bp)
 app.register_blueprint(artists_bp, url_prefix="/")
 app.register_blueprint(users_bp, url_prefix="/")
 
