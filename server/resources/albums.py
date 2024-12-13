@@ -62,13 +62,13 @@ def get_albums(artist_id):
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute(f'''
+        cursor.execute('''
                        SELECT album.id as album_id, album.artist_id, album.name, album.type, album.release_date 
                        FROM ALBUM AS album 
                        JOIN ARTIST AS artist 
                        ON album.artist_id = artist.id 
-                       WHERE artist_id = {artist_id};
-                       ''')
+                       WHERE artist_id = %s;
+                       ''', (artist_id))
         albums = cursor.fetchall()
 
         if not albums:
@@ -103,10 +103,10 @@ def get_album(artist_id, album_id):
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute(f'''
+        cursor.execute('''
                        SELECT * FROM ARTIST 
-                       WHERE id = {artist_id};
-                       ''')
+                       WHERE id = %s;
+                       ''', (artist_id))
         artist = cursor.fetchone()
 
         if artist is None:
@@ -114,13 +114,13 @@ def get_album(artist_id, album_id):
             connection.close()
             return no_artist()
 
-        cursor.execute(f'''
-                        SELECT album.id as album_id, album.artist_id, album.name, album.type, album.release_date 
-                        FROM ALBUM AS album 
-                        JOIN ARTIST AS artist 
-                        ON album.artist_id = artist.id 
-                        WHERE album.artist_id = {artist_id} and album.id = {album_id};
-                        ''')
+        cursor.execute('''
+                       SELECT album.id as album_id, album.artist_id, album.name, album.type, album.release_date 
+                       FROM ALBUM AS album 
+                       JOIN ARTIST AS artist 
+                       ON album.artist_id = artist.id 
+                       WHERE album.artist_id = %s and album.id = %s;
+                       ''', (artist_id, album_id))
         album = cursor.fetchone()
 
         if album is None:
@@ -180,9 +180,10 @@ def add_album(artist_id):
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute(f'''
-                       SELECT * FROM ARTIST WHERE id = {artist_id};
-                       ''')
+        cursor.execute('''
+                       SELECT * FROM ARTIST 
+                       WHERE id = %s;
+                       ''', (artist_id))
         artist = cursor.fetchone()
 
         if artist is None:
@@ -262,9 +263,10 @@ def update_album(artist_id, album_id):
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute(f'''
-                       SELECT * FROM ARTIST WHERE id = {artist_id};
-                       ''')
+        cursor.execute('''
+                       SELECT * FROM ARTIST 
+                       WHERE id = %s;
+                       ''', (artist_id))
         artist = cursor.fetchone()
 
         if artist is None:
@@ -272,13 +274,13 @@ def update_album(artist_id, album_id):
             connection.close()
             return no_artist()
 
-        cursor.execute(f'''
+        cursor.execute('''
                        SELECT * 
                        FROM ALBUM AS album
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
-                       WHERE album.id = {album_id};
-                       ''')
+                       WHERE album.id = %s;
+                       ''', (album_id))
         album = cursor.fetchone()
 
         if album is None:
@@ -286,11 +288,11 @@ def update_album(artist_id, album_id):
             connection.close()
             return no_album()
 
-        cursor.execute(f'''
+        cursor.execute('''
                        UPDATE ALBUM
-                       SET name = "{name}", `type` = "{album_type}", release_date = "{release_date}"
-                       WHERE id = {album_id};
-                       ''')
+                       SET name = %s, `type` = %s, release_date = %s
+                       WHERE id = %s;
+                       ''', (name, album_type, release_date, album_id))
         connection.commit()
 
         cursor.close()
@@ -346,9 +348,10 @@ def modify_album(artist_id, album_id):
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute(f'''
-                       SELECT * FROM ARTIST WHERE id = {artist_id};
-                       ''')
+        cursor.execute('''
+                       SELECT * FROM ARTIST 
+                       WHERE id = %s;
+                       ''', (artist_id))
         artist = cursor.fetchone()
 
         if artist is None:
@@ -356,29 +359,43 @@ def modify_album(artist_id, album_id):
             connection.close()
             return no_artist()
     
-        cursor.execute(f'''
+        cursor.execute('''
                        SELECT * 
                        FROM ALBUM AS album
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
-                       WHERE album.id = {album_id};
-                       ''')
+                       WHERE album.id = %s;
+                       ''', (album_id))
         album = cursor.fetchone()
 
         if album is None:
             cursor.close()
             connection.close()
             return no_album()
-        
-        cursor.execute(f'''
-                        UPDATE ALBUM
-                        SET {f"name = \"{name}\"," if name else ""} 
-                            {f"`type` = \"{album_type}\"," if album_type else ""} 
-                            {f"release_date = \"{release_date}\"" if release_date else ""}
-                        WHERE id = {album_id};
-                        ''')
-        connection.commit()
 
+        set_clauses = []
+        params = []
+
+        if name:
+            set_clauses.append("name = %s")
+            params.append(name)
+        if album_type:
+            set_clauses.append("`type` = %s")
+            params.append(album_type)
+        if release_date:
+            set_clauses.append("release_date = %s")
+            params.append(release_date)
+
+        set_clause = ", ".join(set_clauses)
+        params.append(album_id)
+
+        cursor.execute('''
+                       UPDATE ALBUM 
+                       SET {}
+                       WHERE id = %s;
+                       '''.format(set_clause), params)
+        connection.commit()
+        
         cursor.close()
         connection.close()
         
@@ -411,9 +428,10 @@ def delete_album(artist_id, album_id):
 
         # this check of existance of artist and existance of album of given artist 
         # has been all around the api, should be a function. 
-        cursor.execute(f'''
-                       SELECT * FROM ARTIST WHERE id = {artist_id};
-                       ''')
+        cursor.execute('''
+                       SELECT * FROM ARTIST 
+                       WHERE id = %s;
+                       ''', (artist_id))
         artist = cursor.fetchone()
 
         if artist is None:
@@ -421,12 +439,12 @@ def delete_album(artist_id, album_id):
             connection.close()
             return no_artist()
     
-        cursor.execute(f'''
+        cursor.execute('''
                        SELECT * FROM ALBUM AS album
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
-                       WHERE album.id = {album_id};
-                       ''')
+                       WHERE album.id = %s;
+                       ''', (album_id))
         album = cursor.fetchone()
 
         if album is None:
@@ -434,10 +452,10 @@ def delete_album(artist_id, album_id):
             connection.close()
             return no_album()
         
-        cursor.execute(f'''
+        cursor.execute('''
                        DELETE FROM ALBUM
-                       WHERE id = {album_id};
-                       ''')
+                       WHERE id = %s;
+                       ''', (album_id))
         connection.commit()
 
         cursor.close()

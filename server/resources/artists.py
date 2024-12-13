@@ -45,7 +45,7 @@ def get_artists():
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute(f'''
+        cursor.execute('''
                        SELECT * FROM ARTIST;
                        ''')
         artists = cursor.fetchall()
@@ -74,10 +74,10 @@ def get_artist(artist_id):
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute(f'''
+        cursor.execute('''
                        SELECT * FROM ARTIST 
-                       WHERE id = {artist_id};
-                       ''')
+                       WHERE id = %s;
+                       ''', (artist_id))
         artist = cursor.fetchone()
 
         if artist is None:
@@ -174,10 +174,10 @@ def update_artist(artist_id):
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute(f'''
+        cursor.execute('''
                        SELECT * FROM ARTIST 
-                       WHERE id = {artist_id};
-                       ''')
+                       WHERE id = %s;
+                       ''', (artist_id))
         artist = cursor.fetchone()
 
         if artist is None:
@@ -185,11 +185,11 @@ def update_artist(artist_id):
             connection.close()
             return no_artist()
 
-        cursor.execute(f'''
+        cursor.execute('''
                        UPDATE ARTIST 
-                       SET name = "{name}", short_info = "{short_info}" 
-                       WHERE id = {artist_id};
-                       ''')
+                       SET name = %s, short_info = %s 
+                       WHERE id = %s;
+                       ''', (name, short_info, artist_id))
         connection.commit()
 
         cursor.close()
@@ -225,10 +225,10 @@ def modify_artist(artist_id):
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute(f'''
+        cursor.execute('''
                        SELECT * FROM ARTIST 
-                       WHERE id = {artist_id};
-                       ''')
+                       WHERE id = %s;
+                       ''', (artist_id))
         artist = cursor.fetchone()
 
         if artist is None:
@@ -245,12 +245,24 @@ def modify_artist(artist_id):
                 }
             ), BAD_REQUEST
         
-        cursor.execute(f'''
-                        UPDATE ARTIST 
-                        SET {f"name = \"{name}\"," if name else ""}
-                            {f"short_info = \"{short_info}\"" if short_info else ""} 
-                        WHERE id = {artist_id};
-                        ''')
+        set_clauses = []
+        params = []
+
+        if name:
+            set_clauses.append("name = %s")
+            params.append(name)
+        if short_info:
+            set_clauses.append("short_info = %s")
+            params.append(short_info)
+        
+        set_clause = ", ".join(set_clauses)
+        params.append(artist_id)
+
+        cursor.execute('''
+                       UPDATE ARTIST 
+                       SET {} 
+                       WHERE id = %s;
+                       '''.format(set_clause), params)
         connection.commit()
 
         cursor.close()
@@ -280,10 +292,10 @@ def delete_artist(artist_id):
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute(f'''
+        cursor.execute('''
                        SELECT * FROM ARTIST 
-                       WHERE id = {artist_id};
-                       ''')
+                       WHERE id = %s;
+                       ''', (artist_id))
         artist = cursor.fetchone()
 
         if artist is None:
@@ -291,10 +303,10 @@ def delete_artist(artist_id):
             connection.close()
             return no_artist()
         
-        cursor.execute(f'''
+        cursor.execute('''
                        DELETE FROM ARTIST 
-                       WHERE id = {artist_id};
-                       ''')
+                       WHERE id = %s;
+                       ''', (artist_id))
         connection.commit()
 
         cursor.close()
