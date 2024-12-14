@@ -20,11 +20,12 @@ class db:
                 "database":"MUSICFM",
                 "port":3306
         }
-
-        self.pool = mysql.connector.pooling.MySQLConnectionPool(
-            pool_size= 10,
-            **db_config
-        )
-        
+        try:
+            self.pool = mysql.connector.pooling.MySQLConnectionPool(
+                pool_size= 10,
+                **db_config
+            )
+        except:
+            print("Failed to connect")
     def connect(self):
         return self.pool.get_connection()
