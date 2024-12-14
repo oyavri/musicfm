@@ -108,7 +108,7 @@ def get_user(user_id):
         cursor.execute('''
                        SELECT * FROM USER
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -177,7 +177,7 @@ def add_user(user_id):
         cursor.execute('''
                        SELECT email FROM USER
                        WHERE email = %s;
-                       ''', (email))
+                       ''', [email])
         dbEmail = cursor.fetchone()
 
         if dbEmail is not None:
@@ -188,7 +188,7 @@ def add_user(user_id):
         cursor.execute('''
                        INSERT INTO USER (nickname, email, gender) 
                        VALUES (%s, %s, %s);
-                       ''', (nickname, email, gender))
+                       ''', [nickname, email, gender])
         cursor.commit()
 
         user_id = cursor.lastrowid
@@ -265,7 +265,7 @@ def update_user(user_id):
         cursor.execute('''
                        SELECT * FROM USER 
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -276,7 +276,7 @@ def update_user(user_id):
         cursor.execute('''
                        SELECT email FROM USER
                        WHERE email = %s;
-                       ''', (email))
+                       ''', [email])
         dbEmail = cursor.fetchone()
 
         if dbEmail is not None:
@@ -287,8 +287,8 @@ def update_user(user_id):
         cursor.execute(f'''
                        UPDATE USER
                        SET nickname = %s, email = %s, gender = %s 
-                       WHERE id = {user_id};
-                       ''', (nickname, email, gender, user_id))
+                       WHERE id = %s;
+                       ''', [nickname, email, gender, user_id])
         cursor.commit()
 
         cursor.close()
@@ -351,10 +351,10 @@ def modify_user(user_id):
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute(f'''
+        cursor.execute('''
                        SELECT * FROM USER 
-                       WHERE id = {user_id};
-                       ''')
+                       WHERE id = %s;
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -365,7 +365,7 @@ def modify_user(user_id):
         cursor.execute('''
                        SELECT email FROM USER
                        WHERE email = %s;
-                       ''', (email))
+                       ''', [email])
         dbEmail = cursor.fetchone()
 
         if dbEmail is not None:
@@ -427,7 +427,7 @@ def delete_user(user_id):
         cursor.execute('''
                        SELECT * FROM USER 
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -438,7 +438,7 @@ def delete_user(user_id):
         cursor.execute('''
                        DELETE FROM USER 
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         cursor.commit()
 
         cursor.close()
@@ -468,7 +468,7 @@ def get_likes_of_user(user_id):
         cursor.execute('''
                        SELECT * FROM USER 
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -482,7 +482,7 @@ def get_likes_of_user(user_id):
                        JOIN TRACK as track
                        ON user_like.track_id = track.id
                        WHERE user.id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         likedTracks = cursor.fetchall()
 
         if not likedTracks:
@@ -517,7 +517,7 @@ def get_like_of_user(user_id, track_id):
         cursor.execute('''
                        SELECT * FROM USER 
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -528,7 +528,7 @@ def get_like_of_user(user_id, track_id):
         cursor.execute('''
                        SELECT * FROM TRACK 
                        WHERE id = %s;
-                       ''', (track_id))
+                       ''', [track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -539,7 +539,7 @@ def get_like_of_user(user_id, track_id):
         cursor.execute('''
                        SELECT * FROM USER_LIKE
                        WHERE user_id = %s AND track_id = %s;
-                       ''', (user_id, track_id))
+                       ''', [user_id, track_id])
         like = cursor.fetchone()
 
         response = { "liked": f"{ like is not None }" }
@@ -568,7 +568,7 @@ def get_rates_of_user(user_id):
         cursor.execute('''
                        SELECT * FROM USER 
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -582,7 +582,7 @@ def get_rates_of_user(user_id):
                        JOIN TRACK AS track
                        ON rate.track_id = track.id
                        WHERE user.id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         ratedTracks = cursor.fetchall()
 
         if not ratedTracks:
@@ -616,7 +616,7 @@ def get_rate_of_user(user_id, track_id):
         cursor.execute('''
                        SELECT * FROM USER 
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -627,7 +627,7 @@ def get_rate_of_user(user_id, track_id):
         cursor.execute('''
                        SELECT * FROM TRACK 
                        WHERE id = %s;
-                       ''', (track_id))
+                       ''', [track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -641,7 +641,7 @@ def get_rate_of_user(user_id, track_id):
                        JOIN TRACK AS track
                        ON rate.track_id = track.id
                        WHERE user.id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         ratedTrack = cursor.fetchone()
 
         if ratedTrack is None:

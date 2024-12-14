@@ -97,7 +97,7 @@ def get_tracks(artist_id, album_id):
         cursor.execute('''
                        SELECT * FROM ARTIST
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -110,7 +110,7 @@ def get_tracks(artist_id, album_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s;
-                       ''', (album_id, artist_id))
+                       ''', [album_id, artist_id])
         album = cursor.fetchone()
 
         if album is None:
@@ -125,7 +125,7 @@ def get_tracks(artist_id, album_id):
                        JOIN ARTIST as artist
                        ON album.artist_id = artist.id
                        WHERE artist.id = %s AND album.id = %s;
-                       ''', (artist_id, album_id))
+                       ''', [artist_id, album_id])
         tracks = cursor.fetchall()
 
         if not tracks:
@@ -158,7 +158,7 @@ def get_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM ARTIST
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -171,7 +171,7 @@ def get_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s;
-                       ''', (album_id, artist_id))
+                       ''', [album_id, artist_id])
         album = cursor.fetchone()
 
         if album is None:
@@ -186,7 +186,7 @@ def get_track(artist_id, album_id, track_id):
                        JOIN ARTIST as artist
                        ON album.artist_id = artist.id
                        WHERE artist.id = %s AND album.id = %s AND track.id = %s;
-                       ''', (artist_id, album_id, track_id))
+                       ''', [artist_id, album_id, track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -245,7 +245,7 @@ def add_track(artist_id, album_id):
         cursor.execute('''
                        SELECT * FROM ARTIST
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -258,7 +258,7 @@ def add_track(artist_id, album_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s;
-                       ''', (album_id, artist_id))
+                       ''', [album_id, artist_id])
         album = cursor.fetchone()
 
         if album is None:
@@ -269,7 +269,7 @@ def add_track(artist_id, album_id):
         cursor.execute('''
                        INSERT INTO TRACK (album_id, name, length_sec) 
                        VALUES (%s, %s, %s);
-                       ''', (album_id, name, length_sec))
+                       ''', [album_id, name, length_sec])
         cursor.commit()
 
         cursor.close()
@@ -337,7 +337,7 @@ def update_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM ARTIST
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -350,7 +350,7 @@ def update_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s;
-                       ''', (album_id, artist_id))
+                       ''', [album_id, artist_id])
         album = cursor.fetchone()
 
         if album is None:
@@ -365,7 +365,7 @@ def update_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s AND track.id = %s;
-                       ''', (album_id, artist_id, track_id))
+                       ''', [album_id, artist_id, track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -377,7 +377,7 @@ def update_track(artist_id, album_id, track_id):
                        UPDATE TRACK 
                        SET name = %s, length_sec = %s"
                        WHERE id = %s;
-                       ''', (name, length_sec, track_id))
+                       ''', [name, length_sec, track_id])
         connection.commit()
 
         cursor.close()
@@ -438,7 +438,7 @@ def modify_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM ARTIST
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -451,7 +451,7 @@ def modify_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s;
-                       ''', (album_id, artist_id))
+                       ''', [album_id, artist_id])
         album = cursor.fetchone()
 
         if album is None:
@@ -466,7 +466,7 @@ def modify_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s AND track.id = %s;
-                       ''', (album_id, artist_id, track_id))
+                       ''', [album_id, artist_id, track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -527,7 +527,7 @@ def delete_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM ARTIST
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -540,7 +540,7 @@ def delete_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s;
-                       ''', (album_id, artist_id))
+                       ''', [album_id, artist_id])
         album = cursor.fetchone()
 
         if album is None:
@@ -555,7 +555,7 @@ def delete_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s AND track.id = %s;
-                       ''', (album_id, artist_id, track_id))
+                       ''', [album_id, artist_id, track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -566,7 +566,7 @@ def delete_track(artist_id, album_id, track_id):
         cursor.execute('''
                        DELETE FROM TRACK
                        WHERE id = %s;
-                       ''', track_id)
+                       ''', [track_id])
         connection.commit()
         
         return jsonify(
@@ -595,7 +595,7 @@ def get_likes_of_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM ARTIST
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -608,7 +608,7 @@ def get_likes_of_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s;
-                       ''', (album_id, artist_id))
+                       ''', [album_id, artist_id])
         album = cursor.fetchone()
 
         if album is None:
@@ -623,7 +623,7 @@ def get_likes_of_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s AND track.id = %s;
-                       ''', (album_id, artist_id, track_id))
+                       ''', [album_id, artist_id, track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -636,7 +636,7 @@ def get_likes_of_track(artist_id, album_id, track_id):
                        JOIN USER_LIKE AS user_like
                        ON user.id = user_like.user_id
                        WHERE user_like.track_id = %s;
-                       ''', (track_id))
+                       ''', [track_id])
         likes = cursor.fetchall()
 
         if not likes:
@@ -678,7 +678,7 @@ def like_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM ARTIST
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -691,7 +691,7 @@ def like_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s;
-                       ''', (album_id, artist_id))
+                       ''', [album_id, artist_id])
         album = cursor.fetchone()
 
         if album is None:
@@ -706,7 +706,7 @@ def like_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s AND track.id = %s;
-                       ''', (album_id, artist_id, track_id))
+                       ''', [album_id, artist_id, track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -717,7 +717,7 @@ def like_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM USER 
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -728,7 +728,7 @@ def like_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM USER_LIKE 
                        WHERE user_id = %s AND track_id = %s;
-                       ''', (user_id, track_id))
+                       ''', [user_id, track_id])
         like = cursor.fetchone()
 
         if like is not None:
@@ -743,7 +743,7 @@ def like_track(artist_id, album_id, track_id):
         cursor.execute('''
                        INSERT INTO USER_LIKE (user_id, track_id) 
                        VALUES (%s, %s);
-                       ''', (user_id, track_id))
+                       ''', [user_id, track_id])
         cursor.commit()
 
         cursor.close()
@@ -787,7 +787,7 @@ def unlike_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM ARTIST
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -800,7 +800,7 @@ def unlike_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s;
-                       ''', (album_id, artist_id))
+                       ''', [album_id, artist_id])
         album = cursor.fetchone()
 
         if album is None:
@@ -815,7 +815,7 @@ def unlike_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s AND track.id = %s;
-                       ''', (album_id, artist_id, track_id))
+                       ''', [album_id, artist_id, track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -826,7 +826,7 @@ def unlike_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM USER 
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -837,7 +837,7 @@ def unlike_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM USER_LIKE
                        WHERE user_id = %s AND track_id = %s;
-                       ''', (user_id, track_id))
+                       ''', [user_id, track_id])
         like = cursor.fetchone()
 
         if like is None:
@@ -848,7 +848,7 @@ def unlike_track(artist_id, album_id, track_id):
         cursor.execute('''
                        DELETE FROM USER_LIKE
                        WHERE user_id = %s AND track_id = %s;
-                       ''', (user_id, track_id))
+                       ''', [user_id, track_id])
         cursor.commit()
 
         cursor.close()
@@ -881,7 +881,7 @@ def get_rates_of_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM ARTIST
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -894,7 +894,7 @@ def get_rates_of_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s;
-                       ''', (album_id, artist_id))
+                       ''', [album_id, artist_id])
         album = cursor.fetchone()
 
         if album is None:
@@ -909,7 +909,7 @@ def get_rates_of_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s AND track.id = %s;
-                       ''', (album_id, artist_id, track_id))
+                       ''', [album_id, artist_id, track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -922,7 +922,7 @@ def get_rates_of_track(artist_id, album_id, track_id):
                        JOIN RATE AS rate
                        ON user.id = rate.user_id 
                        WHERE track_id = %s;
-                       ''', (track_id))
+                       ''', [track_id])
         rates = cursor.fetchall()
 
         if not rates:
@@ -988,7 +988,7 @@ def rate_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM ARTIST
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -1001,7 +1001,7 @@ def rate_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s;
-                       ''', (album_id, artist_id))
+                       ''', [album_id, artist_id])
         album = cursor.fetchone()
 
         if album is None:
@@ -1016,7 +1016,7 @@ def rate_track(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s AND track.id = %s;
-                       ''', (album_id, artist_id, track_id))
+                       ''', [album_id, artist_id, track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -1027,7 +1027,7 @@ def rate_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM USER 
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -1038,7 +1038,7 @@ def rate_track(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM RATE 
                        WHERE user_id = %s AND track_id = %s;
-                       ''', (user_id, track_id))
+                       ''', [user_id, track_id])
         rate = cursor.fetchone()
 
         if rate is not None:
@@ -1053,7 +1053,7 @@ def rate_track(artist_id, album_id, track_id):
         cursor.execute('''
                        INSERT INTO RATE (user_id, track_id, rate) 
                        VALUES (%s, %s, %s);
-                       ''', (user_id, track_id, rate))
+                       ''', [user_id, track_id, rate])
         cursor.commit()
 
         cursor.close()
@@ -1114,7 +1114,7 @@ def modify_rate(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM ARTIST
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -1127,7 +1127,7 @@ def modify_rate(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s;
-                       ''', (album_id, artist_id))
+                       ''', [album_id, artist_id])
         album = cursor.fetchone()
 
         if album is None:
@@ -1142,7 +1142,7 @@ def modify_rate(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s AND track.id = %s;
-                       ''', (album_id, artist_id, track_id))
+                       ''', [album_id, artist_id, track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -1153,7 +1153,7 @@ def modify_rate(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM USER 
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -1164,7 +1164,7 @@ def modify_rate(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM RATE 
                        WHERE user_id = %s AND track_id = %s;
-                       ''', (user_id, track_id))
+                       ''', [user_id, track_id])
         rate = cursor.fetchone()
 
         if rate is None:
@@ -1180,7 +1180,7 @@ def modify_rate(artist_id, album_id, track_id):
                        UPDATE RATE
                        SET rate = %s
                        WHERE user_id = %s AND track_id = %s;
-                       ''', (rate, user_id, track_id))
+                       ''', [rate, user_id, track_id])
         cursor.commit()
 
         cursor.close()
@@ -1224,7 +1224,7 @@ def delete_rate(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM ARTIST
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -1237,7 +1237,7 @@ def delete_rate(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s;
-                       ''', (album_id, artist_id))
+                       ''', [album_id, artist_id])
         album = cursor.fetchone()
 
         if album is None:
@@ -1252,7 +1252,7 @@ def delete_rate(artist_id, album_id, track_id):
                        JOIN ARTIST AS artist
                        ON album.artist_id = artist.id
                        WHERE album.id = %s AND artist.id = %s AND track.id = %s;
-                       ''', (album_id, artist_id, track_id))
+                       ''', [album_id, artist_id, track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -1263,7 +1263,7 @@ def delete_rate(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM USER 
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -1274,7 +1274,7 @@ def delete_rate(artist_id, album_id, track_id):
         cursor.execute('''
                        SELECT * FROM RATE 
                        WHERE user_id = %s AND track_id = %s;
-                       ''', (user_id, track_id))
+                       ''', [user_id, track_id])
         rate = cursor.fetchone()
 
         if rate is None:
@@ -1289,7 +1289,7 @@ def delete_rate(artist_id, album_id, track_id):
         cursor.execute('''
                        DELETE FROM RATE
                        WHERE user_id = %s AND track_id = %s;
-                       ''', (user_id, track_id))
+                       ''', [user_id, track_id])
         cursor.commit()
 
         cursor.close()

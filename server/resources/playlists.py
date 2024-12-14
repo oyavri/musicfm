@@ -85,7 +85,7 @@ def get_playlists(user_id):
         cursor.execute('''
                        SELECT * FROM USER
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -96,7 +96,7 @@ def get_playlists(user_id):
         cursor.execute('''
                        SELECT id, `name` FROM PLAYLISTS
                        WHERE user_id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         playlists = cursor.fetchall()
 
         if not playlists:
@@ -128,7 +128,7 @@ def get_playlist(user_id, playlist_id):
         cursor.execute('''
                        SELECT * FROM USER
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -139,7 +139,7 @@ def get_playlist(user_id, playlist_id):
         cursor.execute('''
                        SELECT * FROM PLAYLIST
                        WHERE id = %s AND user_id = %s;
-                       ''', (playlist_id, user_id))
+                       ''', [playlist_id, user_id])
         playlist = cursor.fetchone()
 
         if playlist is None:
@@ -155,7 +155,7 @@ def get_playlist(user_id, playlist_id):
                        JOIN TRACK AS track
                        ON contain.track_id = track.id
                        WHERE playlist.id = %s AND playlist.user_id = %s;
-                       ''', playlist_id, user_id)
+                       ''', [playlist_id, user_id])
         tracks = cursor.fetchall()
 
         cursor.close()
@@ -198,7 +198,7 @@ def add_track_to_playlist():
         cursor.execute('''
                        SELECT * FROM TRACK 
                        WHERE id = %s;
-                       ''', (track_id))
+                       ''', [track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -209,7 +209,7 @@ def add_track_to_playlist():
         cursor.execute('''
                        SELECT * FROM USER
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -220,7 +220,7 @@ def add_track_to_playlist():
         cursor.execute('''
                        SELECT * FROM PLAYLIST
                        WHERE id = %s AND user_id = %s;
-                       ''', (playlist_id, user_id))
+                       ''', [playlist_id, user_id])
         playlist = cursor.fetchone()
 
         if playlist is None:
@@ -231,7 +231,7 @@ def add_track_to_playlist():
         cursor.execute('''
                        INSERT INTO CONTAINS (playlist_id, track_id) 
                        VALUES (%s, %s);
-                       ''', (playlist_id, track_id))
+                       ''', [playlist_id, track_id])
         cursor.commit()
 
         cursor.close()
@@ -274,7 +274,7 @@ def remove_track_from_playlist():
         cursor.execute('''
                        SELECT * FROM TRACK 
                        WHERE id = %s;
-                       ''', (track_id))
+                       ''', [track_id])
         track = cursor.fetchone()
 
         if track is None:
@@ -285,7 +285,7 @@ def remove_track_from_playlist():
         cursor.execute('''
                        SELECT * FROM USER
                        WHERE id = %s;
-                       ''', (user_id))
+                       ''', [user_id])
         user = cursor.fetchone()
 
         if user is None:
@@ -296,7 +296,7 @@ def remove_track_from_playlist():
         cursor.execute('''
                        SELECT * FROM PLAYLIST
                        WHERE id = %s AND user_id = %s;
-                       ''', (playlist_id, user_id))
+                       ''', [playlist_id, user_id])
         playlist = cursor.fetchone()
 
         if playlist is None:
@@ -307,7 +307,7 @@ def remove_track_from_playlist():
         cursor.execute('''
                        SELECT * FROM PLAYLIST
                        WHERE id = %s AND user_id = %s;
-                       ''', (playlist_id, user_id))
+                       ''', [playlist_id, user_id])
         track_in_playlist = cursor.fetchone()
 
         if track_in_playlist is None:
@@ -318,7 +318,7 @@ def remove_track_from_playlist():
         cursor.execute('''
                        DELETE FROM CONTAINS 
                        WHERE track_id = %s AND playlist_id = %s;
-                       ''', (track_id, playlist_id))
+                       ''', [track_id, playlist_id])
         cursor.commit()
 
         cursor.close()

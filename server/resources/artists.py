@@ -77,7 +77,7 @@ def get_artist(artist_id):
         cursor.execute('''
                        SELECT * FROM ARTIST 
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -124,7 +124,7 @@ def add_artist():
         cursor.execute('''
                        INSERT INTO ARTIST (name, short_info) 
                        VALUES (%s, %s);
-                       ''', (name, short_info))
+                       ''', [name, short_info])
         connection.commit()
 
         cursor.close()
@@ -177,7 +177,7 @@ def update_artist(artist_id):
         cursor.execute('''
                        SELECT * FROM ARTIST 
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -189,7 +189,7 @@ def update_artist(artist_id):
                        UPDATE ARTIST 
                        SET name = %s, short_info = %s 
                        WHERE id = %s;
-                       ''', (name, short_info, artist_id))
+                       ''', [name, short_info, artist_id])
         connection.commit()
 
         cursor.close()
@@ -228,7 +228,7 @@ def modify_artist(artist_id):
         cursor.execute('''
                        SELECT * FROM ARTIST 
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -295,7 +295,7 @@ def delete_artist(artist_id):
         cursor.execute('''
                        SELECT * FROM ARTIST 
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         artist = cursor.fetchone()
 
         if artist is None:
@@ -306,7 +306,7 @@ def delete_artist(artist_id):
         cursor.execute('''
                        DELETE FROM ARTIST 
                        WHERE id = %s;
-                       ''', (artist_id))
+                       ''', [artist_id])
         connection.commit()
 
         cursor.close()
