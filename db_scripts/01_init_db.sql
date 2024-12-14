@@ -28,7 +28,7 @@ create table ALBUM (
 create table TRACK (
     id int auto_increment,
     `name` varchar(255) not null,
-    length_sec float(3) check (length_sec > 0) not null,
+    length_sec float not null check (length_sec > 0),
     album_id int,
 
     primary key (id),
@@ -42,18 +42,18 @@ create table USER (
     nickname varchar(255) not null,
     email varchar(255) not null check(email like '_%@_%' and length(email) > 5),
     created_at datetime default now(),
-    gender char(1) check(gender like 'F' or gender like 'M' or gender = null),
+    gender char(1) check(gender IN ('F', 'M', '') or gender is null) ,
 
-    primary key (id)
-    unique (email)
+    primary key (id),
+    constraint unique_email unique (email)
 );
 
 create table USER_LIKE (
     user_id int,
     track_id int,
 
-    primary key (user_id, track_id) -- a track cannot be liked twice
-    foreign key (user_id) references USER (id)
+    primary key (user_id, track_id), -- a track cannot be liked twice
+    foreign key (user_id) references `USER` (id)
         on delete cascade
         on update cascade, -- check validity
     foreign key (track_id) references TRACK (id)
@@ -66,7 +66,7 @@ create table RATE (
     track_id int,
     rate smallint check (rate > 0 and rate <= 5),
 
-    primary key (user_id, track_id) -- a track cannot be rated twice
+    primary key (user_id, track_id), -- a track cannot be rated twice
     foreign key (user_id) references USER (id)
         on delete cascade
         on update cascade, -- check validity
