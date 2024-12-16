@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="album-details">
+    <header class="album-header">
+        <h1>{{ album['name'] }}</h1>
+        <p>Release Date: {{ album['release_date'] }}</p>
+        <p class="album-info">{{ album.get('description', 'No description available for this album.') }}</p>
+    </header>
+
+    <section class="tracks-section">
+        <h2>Tracks</h2>
+        {% if tracks %}
+        <ul class="tracks-list">
+            {% for track in tracks %}
+            <li class="track-item">
+                <h3>{{ track['name'] }}</h3>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="no-tracks">No tracks available for this album.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

@@ -30,16 +30,3 @@ services:
       - 8000:5000
     volumes:
       - ./server:/app
-  client:
-    depends_on:
-      db:
-        condition: service_healthy
-      app:
-        condition: service_started
-    container_name: client-container
-    volumes:
-      - ./client:/app
-    build:
-      context: ./client
-    ports:
-      - 3000:3000

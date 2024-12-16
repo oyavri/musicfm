@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="artist-details">
+    <header class="artist-header">
+        <h1>{{ artist['name'] }}</h1>
+        <p class="artist-bio">{{ artist.get('bio', 'No biography available for this artist.') }}</p>
+    </header>
+
+    <section class="albums-section">
+        <h2>Albums</h2>
+        {% if albums %}
+        <div class="albums-grid">
+            {% for album in albums %}
+            <div class="album-card">
+                <h3>{{ album['name'] }}</h3>
+                <p>Release Date: {{ album['release_date'] }}</p>
+                <a href="/artists/{{ artist['id'] }}/albums/{{ album['album_id'] }}" class="album-link">View Album</a>
+
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="no-albums">This artist has no albums available.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
