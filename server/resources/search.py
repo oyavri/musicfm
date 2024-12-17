@@ -31,14 +31,14 @@ def search():
         limit = int(limit)
         offset = int(offset)
 
-        if query_filter != "artist" or query_filter != "album" or query_filter != "track":
+        if query_filter != "artist" and query_filter != "album" and query_filter != "track":
             return jsonify(
                 {
                     "error": "Filter can only be one of the following: \"artist\", \"album\", or \"track\"."
                 }
             ), BAD_REQUEST
         
-        if order_by != "asc" or order_by != "desc":
+        if order_by != "asc" and order_by != "desc":
             return jsonify(
                 {
                     "error": "Ordering can only be either one of the following: \"asc\" or \"desc\"."
@@ -55,7 +55,7 @@ def search():
                            ORDER BY %s
                            LIMIT %s
                            OFFSET %s;
-                           ''', [f"%{query}%", order_by, limit, offset])
+                           ''', [f"{query}%", order_by, limit, offset])
 
         if query_filter == "album":
             cursor.execute('''
@@ -64,16 +64,16 @@ def search():
                            ORDER BY %s
                            LIMIT %s
                            OFFSET %s;
-                           ''', [f"%{query}%", order_by, limit, offset])
+                           ''', [f"{query}%", order_by, limit, offset])
             
         if query_filter == "track":
             cursor.execute('''
-                           SELECT id, album_id, name, length_sec FROM ALBUM
+                           SELECT id, album_id, name, length_sec FROM TRACK
                            WHERE name LIKE %s
                            ORDER BY %s
                            LIMIT %s
                            OFFSET %s;
-                           ''', [f"%{query}%", order_by, limit, offset])
+                           ''', [f"{query}%", order_by, limit, offset])
 
         result = cursor.fetchall()
 

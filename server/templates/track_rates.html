@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="track-rates-container">
+    <h1 class="track-title">Track {{ track_id }} - Ratings</h1>
+
+    {% if rates %}
+    <table class="rates-table">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Nickname</th>
+                <th>Rating</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rate in rates %}
+            <tr>
+                <td>{{ rate['id'] }}</td>
+                <td>{{ rate['nickname'] }}</td>
+                <td class="rating-cell">{{ rate['rate'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-ratings">
+        <p>No ratings for this track yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

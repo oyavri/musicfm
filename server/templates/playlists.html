@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="playlist-page">
+    <h1>Your Playlists</h1>
+
+    {% if playlists %}
+    <ul>
+        {% for playlist in playlists %}
+        <li>
+            <h2>{{ playlist['name'] }}</h2>
+            <form method="POST">
+                <label for="track_id">Track ID:</label>
+                <input type="text" name="track_id" placeholder="Enter Track ID" required>
+                <input type="hidden" name="playlist_id" value="{{ playlist['id'] }}">
+                <button type="submit" name="action" value="add">Add Track</button>
+                <button type="submit" name="action" value="remove">Remove Track</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>You don't have any playlists yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

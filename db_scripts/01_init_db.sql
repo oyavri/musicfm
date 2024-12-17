@@ -76,15 +76,14 @@ create table RATE (
 );
 
 
-create table PLAYLIST (
-    id int auto_increment,
-    `name` varchar(255) not null,
-    user_id int,
-
-    primary key (id),
-    foreign key (user_id) references USER (id)
-        on delete cascade
-        on update cascade -- check validity
+CREATE TABLE PLAYLIST (
+    id INT AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    user_id INT,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES USER (id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 create table CONTAIN (

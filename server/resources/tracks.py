@@ -9,6 +9,8 @@ CONFLICT = 409
 INTERNAL_SERVER_ERROR = 500
 
 tracks_bp = Blueprint('tracks', __name__, url_prefix="/artists/<artist_id>/albums/<album_id>")
+
+
 db = db()
 
 def is_valid_length(length_sec):

@@ -12,9 +12,18 @@
         {% if tracks %}
         <ul class="tracks-list">
             {% for track in tracks %}
-            <li class="track-item">
-                <h3>{{ track['name'] }} , {{ track['length_sec']}} second </h3>
-            </li>
+            {% for track in tracks %}
+            <div class="track-item">
+                <h3>{{ track['name'] }}</h3>
+                <p>Duration: {{ track['duration'] }}</p>
+                <a href="/artists/{{ artist['id'] }}/albums/{{ album['album_id'] }}/tracks/{{ track['id'] }}/likes" class="btn">View
+                    Likes</a>
+                <a href="/artists/{{ artist['id'] }}/albums/{{ album['album_id'] }}/tracks/{{ track['id'] }}/rates" class="btn">View
+                    Ratings</a>
+            </div>
+            {% endfor %}
+
+
             {% endfor %}
         </ul>
         {% else %}

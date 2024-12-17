@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="track-likes-container">
+    <h1 class="track-title">Track {{ track_id }} - Likes</h1>
+
+    {% if likes %}
+    <table class="likes-table">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Nickname</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for like in likes %}
+            <tr>
+                <td>{{ like['id'] }}</td>
+                <td>{{ like['nickname'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-likes">
+        <p>No likes for this track yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

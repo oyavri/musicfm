@@ -124,77 +124,110 @@ def get_user(user_id):
     except:
         return internal_error()
 
-@users_bp.route('/users', methods=['POST'])
-def add_user(user_id):
+@users_bp.route('/users/<int:user_id>/playlists', methods=['GET'])
+def get_user_playlists(user_id):
     try:
-        user_id = int(user_id)
+        # Connect to the database
+        connection = db.connect()
+        cursor = connection.cursor(dictionary=True)
 
+        # Check if the user exists
+        cursor.execute("SELECT id FROM USER WHERE id = %s;", (user_id,))
+        user = cursor.fetchone()
+        if not user:
+            cursor.close()
+            connection.close()
+            return jsonify({"error": "User not found"}), 404
+
+        # Fetch the user's playlists
+        cursor.execute('''
+            SELECT track.id, track.name, track.length_sec
+            FROM PLAYLIST AS up
+            JOIN TRACK AS track ON up.track_id = track.id
+            WHERE up.user_id = %s;
+        ''', (user_id,))
+
+        playlists = cursor.fetchall()
+
+        cursor.close()
+        connection.close()
+
+        # Return the playlists
+        return jsonify(playlists), 200
+
+    except Exception as e:
+        print(f"Error fetching playlists: {e}")
+        return jsonify({"error": "An internal error occurred"}), 500
+
+
+@users_bp.route('/users', methods=['POST'])
+def add_user():
+    try:
+        # Parse JSON data from the request
         data = request.get_json()
 
         nickname = data.get('nickname')
         email = data.get('email')
         gender = data.get('gender')
 
+        # Validate data presence
         if not data:
             return no_data()
-        
+
         if not nickname:
             return jsonify(
-                {
-                    "error": "\"nickname\" field of the user must be provided."
-                }
-            ), BAD_REQUEST
-        if not email:
-            return jsonify(
-                {
-                    "error": "\"email\" field of the user must be provided."
-                }
-            ), BAD_REQUEST
-        if not gender:
-            return jsonify(
-                {
-                    "error": "\"gender\" field of the user must be provided, field can only be one of the following: \"M\", \"F\" or empty."
-                }
-            ), BAD_REQUEST
-        
-        if not is_valid_email(email):
-            return jsonify(
-                {
-                    "error": "Emails must be longer than 5 characters and in the format of \"<one-or-more-characters>@<one-or-more-characters>\"."
-                }
-            ), BAD_REQUEST
-        
-        if not is_valid_gender(gender):
-            return jsonify(
-                {
-                    "error": "Gender must be either one of \"M\" or \"F\", or not provided."
-                }
+                {"error": "\"nickname\" field of the user must be provided."}
             ), BAD_REQUEST
 
+        if not email:
+            return jsonify(
+                {"error": "\"email\" field of the user must be provided."}
+            ), BAD_REQUEST
+
+        if not gender:
+            return jsonify(
+                {"error": "\"gender\" field of the user must be provided, field can only be one of the following: \"M\", \"F\" or empty."}
+            ), BAD_REQUEST
+
+        # Validate email and gender formats
+        if not is_valid_email(email):
+            return jsonify(
+                {"error": "Emails must be longer than 5 characters and in the format of \"<one-or-more-characters>@<one-or-more-characters>\"."}
+            ), BAD_REQUEST
+
+        if not is_valid_gender(gender):
+            return jsonify(
+                {"error": "Gender must be either one of \"M\" or \"F\", or not provided."}
+            ), BAD_REQUEST
+
+        # Database connection
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute('''
-                       SELECT email FROM USER
-                       WHERE email = %s;
-                       ''', [email])
+        # Check for existing email
+        cursor.execute('SELECT email FROM USER WHERE email = %s;', [email])
         dbEmail = cursor.fetchone()
 
         if dbEmail is not None:
             cursor.close()
             connection.close()
             return email_already_exists()
-        
-        cursor.execute('''
-                       INSERT INTO USER (nickname, email, gender) 
-                       VALUES (%s, %s, %s);
-                       ''', [nickname, email, gender])
-        cursor.commit()
 
+        # Insert the new user
+        cursor.execute(
+            'INSERT INTO USER (nickname, email, gender) VALUES (%s, %s, %s);',
+            [nickname, email, gender]
+        )
+        connection.commit()
+
+        # Get the last inserted user ID
         user_id = cursor.lastrowid
 
+        # Close resources
         cursor.close()
         connection.close()
+
+        # Return success response
         return jsonify(
             {
                 "message": "User added successfully",
@@ -206,11 +239,11 @@ def add_user(user_id):
                 }
             }
         ), CREATED
-    
-    except ValueError:
-        return id_error()
-    except:
+
+    except Exception as e:
+        print(f"Error: {e}")
         return internal_error()
+
 
 @users_bp.route('/users/<user_id>', methods=['PUT'])
 def update_user(user_id):

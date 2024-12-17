@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="explore-tracks-page">
+    <header class="page-header">
+        <h1>Explore Tracks</h1>
+        <p>Find tracks from your favorite albums and artists.</p>
+    </header>
+
+    <!-- Search Form -->
+    <form method="GET" action="/tracks" class="search-form">
+        <input type="text" name="q" placeholder="Search tracks..." value="{{ search_query }}" class="search-input">
+        <button type="submit" class="search-button">Search</button>
+    </form>
+
+    <!-- Tracks Grid -->
+    {% if tracks %}
+    <section class="tracks-grid">
+        {% for track in tracks %}
+        <div class="track-card">
+            <h3>{{ track['name'] }}</h3>
+            <p>Duration: {{ track['length_sec'] }} seconds</p>
+            <a href="/tracks/{{ track['id'] }}" class="track-link">View Details</a>
+        </div>
+        {% endfor %}
+    </section>
+    {% elif search_query %}
+
+    <div class="no-results">
+        <p>No tracks found. Try a different search!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

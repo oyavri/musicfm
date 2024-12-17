@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="explore-artists-page">
+    <header class="page-header">
+        <h1>Explore Artists</h1>
+        <p>Discover your favorite artists and find new inspirations.</p>
+    </header>
+
+    <!-- Search Form -->
+    <form method="GET" action="/artists" class="search-form">
+        <input type="text" name="q" placeholder="Search artists..." value="{{ search_query }}" class="search-input">
+        <button type="submit" class="search-button">Search</button>
+    </form>
+
+    <!-- Artists Grid -->
+    {% if artists %}
+    <section class="artists-grid">
+        {% for artist in artists %}
+        <div class="artist-card">
+            <h3>{{ artist['name'] }}</h3>
+            <p class="artist-info">{{ artist['short_info'] }}</p>
+            <a href="/artists/{{ artist['id'] }}" class="artist-link">View Details</a>
+        </div>
+        {% endfor %}
+    </section>
+    {% elif search_query %}
+    
+    <div class="no-results">
+        <p>No artists found. Try a different search!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="explore-albums-page">
+    <header class="page-header">
+        <h1>Explore Albums</h1>
+        <p>Discover albums from your favorite artists.</p>
+    </header>
+
+    <!-- Search Form -->
+    <form method="GET" action="/albums" class="search-form">
+        <input type="text" name="q" placeholder="Search albums..." value="{{ search_query }}" class="search-input">
+        <button type="submit" class="search-button">Search</button>
+    </form>
+
+    <!-- Albums Grid -->
+    {% if albums %}
+    <section class="albums-grid">
+        {% for album in albums %}
+        <div class="album-card">
+            <h3>{{ album['name'] }}</h3>
+            <p>Release Date: {{ album['release_date'] }}</p>
+            <a href="/albums/{{ album['id'] }}" class="album-link">View Album</a>
+        </div>
+        {% endfor %}
+    </section>
+    {% elif search_query %}
+    <!-- Only show this message if a search query exists -->
+    <div class="no-results">
+        <p>No albums found. Try a different search!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
