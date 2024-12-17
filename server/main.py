@@ -60,18 +60,19 @@ def ArtistDetailsPage(artist_id):
         albums=albums_response,
     )
 @app.route("/artists/<int:artist_id>/albums/<int:album_id>")
-def AlbumDetailsPage(album_id,artist_id):
+def AlbumDetailsPage(artist_id, album_id):
     try:
         # Fetch album details and tracks from the API
-        album_response = requests.get(f"http://localhost:5000/api/albums/{album_id}").json()
-        tracks_response = requests.get(f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}").json()
+        album_response = requests.get(f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}").json()
+        tracks_response = requests.get(f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks").json()
+
     except requests.exceptions.RequestException as e:
         app.logger.error(f"Error fetching album data: {e}")
         album_response = {}
         tracks_response = []
 
     if not album_response:
-        return render_template("404.html", title="Album Not Found"), 404
+        return render_template("404.html", title="Not Found"), 404
 
     return render_template(
         "album_details.html",
