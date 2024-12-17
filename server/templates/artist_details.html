@@ -4,7 +4,7 @@
 <div class="artist-details">
     <header class="artist-header">
         <h1>{{ artist['name'] }}</h1>
-        <p class="artist-bio">{{ artist.get('bio', 'No biography available for this artist.') }}</p>
+        <p class="artist-bio">{{ artist['short_info']}}</p>
     </header>
 
     <section class="albums-section">
