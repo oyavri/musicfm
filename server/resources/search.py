@@ -77,6 +77,9 @@ def search():
 
         result = cursor.fetchall()
 
+        cursor.close()
+        connection.close()
+
         return jsonify(
             {
                 "message": "Search executed successfully",
