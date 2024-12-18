@@ -18,7 +18,7 @@
             <li><a href="/playlists">Playlists</a></li>
             
             {% if session.get('nickname') %}
-                <li><span class="navbar-username">Hello, {{ session['nickname'] }}!</span></li>
+                <li><span class="navbar-username">{{ session['nickname'] }}</span></li>
                 <li><a href="/logout">Logout</a></li>
             {% else %}
                 <li><a href="/register">Register</a></li>
