@@ -20,7 +20,7 @@
         <div class="album-card">
             <h3>{{ album['name'] }}</h3>
             <p>Release Date: {{ album['release_date'] }}</p>
-            <a href="/albums/{{ album['id'] }}" class="album-link">View Album</a>
+            <a href="/artists/{{ album['artist_id'] }}/albums/{{ album['id'] }}" class="album-link">View Album</a>
         </div>
         {% endfor %}
     </section>

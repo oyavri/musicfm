@@ -634,7 +634,7 @@ def get_likes_of_track(artist_id, album_id, track_id):
             return no_track()
         
         cursor.execute('''
-                       SELECT user.id, user.nickname FROM USER AS user
+                       SELECT COUNT(*) AS like_count FROM USER AS user
                        JOIN USER_LIKE AS user_like
                        ON user.id = user_like.user_id
                        WHERE user_like.track_id = %s;
@@ -920,26 +920,17 @@ def get_rates_of_track(artist_id, album_id, track_id):
             return no_track()
         
         cursor.execute('''
-                       SELECT user.id, user.nickname, rate.rate FROM USER AS user
+                       SELECT ROUND(COALESCE(AVG(rate.rate), 0), 2) AS average_rate FROM USER AS user
                        JOIN RATE AS rate
                        ON user.id = rate.user_id 
                        WHERE track_id = %s;
                        ''', [track_id])
-        rates = cursor.fetchall()
-
-        if not rates:
-            cursor.close()
-            connection.close()
-            return jsonify(
-                {
-                    "message": "No user has rated this track yet."
-                }
-            ), OK
+        avg_rate = cursor.fetchone()
         
         cursor.close()
         connection.close()
 
-        return jsonify(rates), OK
+        return jsonify(avg_rate), OK
     
     except ValueError:
         return id_error()

@@ -20,7 +20,7 @@
         <div class="track-card">
             <h3>{{ track['name'] }}</h3>
             <p>Duration: {{ track['length_sec'] }} seconds</p>
-            <a href="/tracks/{{ track['id'] }}" class="track-link">View Details</a>
+            <a href="artists/{{ track['artist_id' ]}}/albums/{{ track['album_id'] }}/tracks/{{ track['id'] }}" class="track-link">View Details</a>
         </div>
         {% endfor %}
     </section>

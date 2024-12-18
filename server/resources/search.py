@@ -68,8 +68,10 @@ def search():
             
         if query_filter == "track":
             cursor.execute('''
-                           SELECT id, album_id, name, length_sec FROM TRACK
-                           WHERE name LIKE %s
+                           SELECT track.id, album.artist_id, track.album_id, track.name, track.length_sec FROM TRACK AS track
+                           JOIN ALBUM as album
+                           ON album.id = track.album_id
+                           WHERE track.name LIKE %s
                            ORDER BY %s
                            LIMIT %s
                            OFFSET %s;
@@ -92,9 +94,9 @@ def search():
                 "error": "Limit and offset must be an integer."
             }
         ), BAD_REQUEST
-    except:
+    except Exception as e:
         return jsonify(
             {
-                "error": "internal error"
+                "error": f"internal error {e}"
             }
         ), INTERNAL_SERVER_ERROR
