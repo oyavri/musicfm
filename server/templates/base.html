@@ -1,8 +1,47 @@
-{% if session.get('nickname') %}
-    <li><a href="/playlists">Playlists</a></li>
-    <li><span>Hello, {{ session['nickname'] }}!</span></li>
-    <li><a href="/logout">Logout</a></li>
-{% else %}
-    <li><a href="/register">Register</a></li>
-    <li><a href="/login">Login</a></li>
-{% endif %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="/">MusicApp</a>
+        </div>
+        <ul class="navbar-links">
+            <li><a href="/artists">Artists</a></li>
+            <li><a href="/albums">Albums</a></li>
+            <li><a href="/tracks">Tracks</a></li>
+            <li><a href="/playlists">Playlists</a></li>
+            
+            {% if session.get('nickname') %}
+                <li><span class="navbar-username">Hello, {{ session['nickname'] }}!</span></li>
+                <li><a href="/logout">Logout</a></li>
+            {% else %}
+                <li><a href="/register">Register</a></li>
+                <li><a href="/login">Login</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul>
+            {% for category, message in messages %}
+            <li class="flash {{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
