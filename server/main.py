@@ -344,3 +344,7 @@ def user_playlists():
         print(f"Error: {e}")
         flash("An error occurred while managing playlists.", "error")
         return redirect(url_for("HomePage"))
+
+if __name__ == "__main__":
+    db()
+    app.run(host="0.0.0.0", port=5000, debug=True)
