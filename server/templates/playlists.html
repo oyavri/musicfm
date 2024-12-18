@@ -1,26 +1,60 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="playlist-page">
+<div class="playlists-container">
     <h1>Your Playlists</h1>
 
-    {% if playlists %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
     <ul>
-        {% for playlist in playlists %}
-        <li>
-            <h2>{{ playlist['name'] }}</h2>
-            <form method="POST">
-                <label for="track_id">Track ID:</label>
-                <input type="text" name="track_id" placeholder="Enter Track ID" required>
-                <input type="hidden" name="playlist_id" value="{{ playlist['id'] }}">
-                <button type="submit" name="action" value="add">Add Track</button>
-                <button type="submit" name="action" value="remove">Remove Track</button>
-            </form>
-        </li>
+        {% for category, message in messages %}
+        <li class="flash {{ category }}">{{ message }}</li>
         {% endfor %}
     </ul>
+    {% endif %}
+    {% endwith %}
+
+    {% if playlists %}
+    {% for playlist in playlists %}
+    <div class="playlist">
+        <h2>{{ playlist.name }}</h2>
+
+        <!-- Tracks in Playlist -->
+        {% if playlist.tracks %}
+        <ul>
+            {% for track in playlist.tracks %}
+            <li>
+                {{ track.name }} ({{ track.length_sec }} seconds)
+                <form method="POST" style="display: inline;">
+                    <input type="hidden" name="playlist_id" value="{{ playlist.id }}">
+                    <input type="hidden" name="track_id" value="{{ track.id }}">
+                    <button type="submit" name="action" value="remove">Remove</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No tracks in this playlist yet.</p>
+        {% endif %}
+
+        <!-- Add Track Form -->
+        <form method="POST" class="add-track-form">
+            <label for="track_id_{{ playlist.id }}">Track ID:</label>
+            <input type="text" name="track_id" id="track_id_{{ playlist.id }}" required>
+            <input type="hidden" name="playlist_id" value="{{ playlist.id }}">
+            <button type="submit" name="action" value="add">Add Track</button>
+        </form>
+    </div>
+    {% endfor %}
     {% else %}
-    <p>You don't have any playlists yet.</p>
+    <p>You have no playlists yet.</p>
+
+    <!-- Create Playlist Form -->
+    <form method="POST" class="create-playlist-form">
+        <label for="playlist_name">Playlist Name:</label>
+        <input type="text" name="playlist_name" id="playlist_name" required>
+        <button type="submit" name="action" value="create_playlist">Create Playlist</button>
+    </form>
     {% endif %}
 </div>
 {% endblock %}
