@@ -243,10 +243,6 @@ def register():
 
     return render_template("register.html")
 
-
-
-from flask import session, flash, redirect, url_for
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -309,32 +305,50 @@ def user_playlists():
 
         if request.method == "POST":
             action = request.form.get("action")
+            playlist_name = request.form.get("playlist_name")
             playlist_id = request.form.get("playlist_id")
             track_id = request.form.get("track_id")
 
-            if not playlist_id or not track_id:
-                flash("Playlist ID and Track ID are required.", "error")
-                return redirect(url_for("user_playlists"))
+            # Handle playlist creation
+            if action == "create_playlist":
+                if not playlist_name:
+                    flash("Playlist name is required.", "error")
+                else:
+                    create_response = requests.post(
+                        f"http://localhost:5000/api/users/{user_id}/playlists",
+                        json={"name": playlist_name},
+                    )
+                    if create_response.status_code == 201:
+                        flash("Playlist created successfully!", "success")
+                    else:
+                        flash("Failed to create playlist. Try again.", "error")
 
-            # Add or remove track based on form action
-            if action == "add":
-                add_response = requests.post(
-                    f"http://localhost:5000/api/users/{user_id}/playlists/{playlist_id}/add",
-                    json={"track_id": track_id},
-                )
-                if add_response.status_code == 201:
-                    flash("Track added successfully!", "success")
+            # Add or remove tracks
+            elif action == "add":
+                if not playlist_id or not track_id:
+                    flash("Playlist ID and Track ID are required.", "error")
                 else:
-                    flash("Failed to add track. Try again.", "error")
+                    add_response = requests.post(
+                        f"http://localhost:5000/api/users/{user_id}/playlists/{playlist_id}/add",
+                        json={"track_id": track_id},
+                    )
+                    if add_response.status_code == 201:
+                        flash("Track added successfully!", "success")
+                    else:
+                        flash("Failed to add track. Try again.", "error")
+
             elif action == "remove":
-                remove_response = requests.post(
-                    f"http://localhost:5000/api/users/{user_id}/playlists/{playlist_id}/remove",
-                    json={"track_id": track_id},
-                )
-                if remove_response.status_code == 200:
-                    flash("Track removed successfully!", "success")
+                if not playlist_id or not track_id:
+                    flash("Playlist ID and Track ID are required.", "error")
                 else:
-                    flash("Failed to remove track. Try again.", "error")
+                    remove_response = requests.post(
+                        f"http://localhost:5000/api/users/{user_id}/playlists/{playlist_id}/remove",
+                        json={"track_id": track_id},
+                    )
+                    if remove_response.status_code == 200:
+                        flash("Track removed successfully!", "success")
+                    else:
+                        flash("Failed to remove track. Try again.", "error")
 
             return redirect(url_for("user_playlists"))
 
@@ -344,6 +358,7 @@ def user_playlists():
         print(f"Error: {e}")
         flash("An error occurred while managing playlists.", "error")
         return redirect(url_for("HomePage"))
+
 
 if __name__ == "__main__":
     db()
