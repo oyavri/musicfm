@@ -35,10 +35,10 @@ def id_error_including_track():
         }
     ), BAD_REQUEST
 
-def internal_error():
+def internal_error(e):
     return jsonify(
         {
-            "error": "An internal error occurred."
+            "error": f"An internal error occurred. {e}"
         }
     ), INTERNAL_SERVER_ERROR
 
@@ -124,42 +124,6 @@ def get_user(user_id):
     except:
         return internal_error()
 
-@users_bp.route('/users/<int:user_id>/playlists', methods=['GET'])
-def get_user_playlists(user_id):
-    try:
-        # Connect to the database
-        connection = db.connect()
-        cursor = connection.cursor(dictionary=True)
-
-        # Check if the user exists
-        cursor.execute("SELECT id FROM USER WHERE id = %s;", (user_id,))
-        user = cursor.fetchone()
-        if not user:
-            cursor.close()
-            connection.close()
-            return jsonify({"error": "User not found"}), 404
-
-        # Fetch the user's playlists
-        cursor.execute('''
-            SELECT track.id, track.name, track.length_sec
-            FROM PLAYLIST AS up
-            JOIN TRACK AS track ON up.track_id = track.id
-            WHERE up.user_id = %s;
-        ''', (user_id,))
-
-        playlists = cursor.fetchall()
-
-        cursor.close()
-        connection.close()
-
-        # Return the playlists
-        return jsonify(playlists), 200
-
-    except Exception as e:
-        print(f"Error fetching playlists: {e}")
-        return jsonify({"error": "An internal error occurred"}), 500
-
-
 @users_bp.route('/users', methods=['POST'])
 def add_user():
     try:
@@ -240,8 +204,7 @@ def add_user():
             }
         ), CREATED
 
-    except Exception as e:
-        print(f"Error: {e}")
+    except:
         return internal_error()
 
 

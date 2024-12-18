@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, request
 from database import db
-import re
 
 OK = 200
 CREATED = 201
@@ -8,7 +7,7 @@ BAD_REQUEST = 400
 NOT_FOUND = 404
 INTERNAL_SERVER_ERROR = 500
 
-playlists_bp = Blueprint('playlists', __name__, url_prefix="users/<user_id>")
+playlists_bp = Blueprint('playlists', __name__, url_prefix="/users/<user_id>")
 db = db()
 
 def id_error():
@@ -94,7 +93,7 @@ def get_playlists(user_id):
             return no_user()
 
         cursor.execute('''
-                       SELECT id, `name` FROM PLAYLISTS
+                       SELECT id, `name` FROM PLAYLIST
                        WHERE user_id = %s;
                        ''', [user_id])
         playlists = cursor.fetchall()
