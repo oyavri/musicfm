@@ -1118,3 +1118,68 @@ form {
 .playlist-page button:hover {
     background-color: #2980b9;
 }
+
+.playlists-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.playlists-container h1 {
+    text-align: center;
+    color: #333;
+}
+
+.playlist, .create-playlist-form {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.playlist h2 {
+    margin: 0;
+    color: #3498db;
+}
+
+.playlist ul {
+    list-style: none;
+    padding: 0;
+}
+
+.playlist li {
+    margin: 5px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.add-track-form, .create-playlist-form {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.add-track-form input, .create-playlist-form input {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.add-track-form button, .create-playlist-form button {
+    padding: 5px 10px;
+    background-color: #2ecc71;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.add-track-form button:hover, .create-playlist-form button:hover {
+    background-color: #27ae60;
+}
