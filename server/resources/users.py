@@ -35,10 +35,10 @@ def id_error_including_track():
         }
     ), BAD_REQUEST
 
-def internal_error(e):
+def internal_error():
     return jsonify(
         {
-            "error": f"An internal error occurred. {e}"
+            "error": "An internal error occurred."
         }
     ), INTERNAL_SERVER_ERROR
 
@@ -285,7 +285,7 @@ def update_user(user_id):
                        SET nickname = %s, email = %s, gender = %s 
                        WHERE id = %s;
                        ''', [nickname, email, gender, user_id])
-        cursor.commit()
+        connection.commit()
 
         cursor.close()
         connection.close()
@@ -390,7 +390,7 @@ def modify_user(user_id):
                        SET {} 
                        WHERE id = {user_id};
                        '''.format(set_clause), params)
-        cursor.commit()
+        connection.commit()
 
         cursor.close()
         connection.close()
@@ -435,7 +435,7 @@ def delete_user(user_id):
                        DELETE FROM USER 
                        WHERE id = %s;
                        ''', [user_id])
-        cursor.commit()
+        connection.commit()
 
         cursor.close()
         connection.close()

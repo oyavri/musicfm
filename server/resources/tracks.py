@@ -272,7 +272,7 @@ def add_track(artist_id, album_id):
                        INSERT INTO TRACK (album_id, name, length_sec) 
                        VALUES (%s, %s, %s);
                        ''', [album_id, name, length_sec])
-        cursor.commit()
+        connection.commit()
 
         cursor.close()
         connection.close()
@@ -697,7 +697,7 @@ def like_track(artist_id, album_id, track_id):
                        INSERT INTO USER_LIKE (user_id, track_id) 
                        VALUES (%s, %s);
                        ''', [user_id, track_id])
-        cursor.commit()
+        connection.commit()
 
         cursor.close()
         connection.close()
@@ -802,7 +802,7 @@ def unlike_track(artist_id, album_id, track_id):
                        DELETE FROM USER_LIKE
                        WHERE user_id = %s AND track_id = %s;
                        ''', [user_id, track_id])
-        cursor.commit()
+        connection.commit()
 
         cursor.close()
         connection.close()
@@ -998,7 +998,7 @@ def rate_track(artist_id, album_id, track_id):
                        INSERT INTO RATE (user_id, track_id, rate) 
                        VALUES (%s, %s, %s);
                        ''', [user_id, track_id, rate])
-        cursor.commit()
+        connection.commit()
 
         cursor.close()
         connection.close()
@@ -1125,7 +1125,7 @@ def modify_rate(artist_id, album_id, track_id):
                        SET rate = %s
                        WHERE user_id = %s AND track_id = %s;
                        ''', [rate, user_id, track_id])
-        cursor.commit()
+        connection.commit()
 
         cursor.close()
         connection.close()
@@ -1234,7 +1234,7 @@ def delete_rate(artist_id, album_id, track_id):
                        DELETE FROM RATE
                        WHERE user_id = %s AND track_id = %s;
                        ''', [user_id, track_id])
-        cursor.commit()
+        connection.commit()
 
         cursor.close()
         connection.close()
