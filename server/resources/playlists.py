@@ -347,23 +347,11 @@ def add_track_to_playlist(user_id, playlist_id):
     except:
         return internal_error()
 
-@playlists_bp.route('/playlists/<playlist_id>', methods=['DELETE'])
-def remove_track_from_playlist():
+@playlists_bp.route('/playlists/<playlist_id>/tracks/<track_id>', methods=['DELETE'])
+def remove_track_from_playlist(user_id, playlist_id, track_id):
     try:
         user_id = int(user_id)
         playlist_id = int(playlist_id)
-        
-        data = request.get_json()
-        if not data:
-            return no_data()
-        track_id = data.get('track_id')
-        if not track_id:
-            return jsonify(
-                {
-                    "error": "\"track_id\" must be provided."
-                }
-            ), BAD_REQUEST
-
         track_id = int(track_id)
 
         connection = db.connect()
