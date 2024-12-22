@@ -2,33 +2,37 @@
 
 {% block content %}
 <div class="album-details">
-    <header class="album-header">
-        <h1>{{ album['name'] }}</h1>
-        <p>Release Date: {{ album['release_date'] }}</p>
-    </header>
+  <header class="album-header">
+    <h1>{{ album['name'] }}</h1>
+    <p>Release Date: {{ album['release_date'] }}</p>
+  </header>
 
-    <section class="tracks-section">
-        <h2>Tracks</h2>
-        {% if tracks %}
-        <ul class="tracks-list">
-            {% for track in tracks %}
-            {% for track in tracks %}
-            <div class="track-item">
-                <h3>{{ track['name'] }}</h3>
-                <p>Duration: {{ track['duration'] }}</p>
-                <a href="/artists/{{ artist['id'] }}/albums/{{ album['album_id'] }}/tracks/{{ track['id'] }}/likes" class="btn">View
-                    Likes</a>
-                <a href="/artists/{{ artist['id'] }}/albums/{{ album['album_id'] }}/tracks/{{ track['id'] }}/rates" class="btn">View
-                    Ratings</a>
-            </div>
-            {% endfor %}
-
-
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p class="no-tracks">No tracks available for this album.</p>
-        {% endif %}
-    </section>
+  <section class="tracks-section">
+    <h2>Tracks</h2>
+    {% if tracks %}
+    <table class="tracks-table">
+      <thead>
+        <tr>
+          <th>Track Name</th>
+          <th>Length (Seconds)</th>
+          <th>Likes</th>
+          <th>Average Rating</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for track in tracks %}
+        <tr>
+          <td>{{ track.name }}</td>
+          <td>{{ track.length_sec }}</td>
+          <td>{{ track.likes }} likes</td>
+          <td>{{ track.avg_rate }} avg. rating</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="no-tracks">No tracks available for this album.</p>
+    {% endif %}
+  </section>
 </div>
 {% endblock %}

@@ -20,12 +20,59 @@
         <div class="track-card">
             <h3>{{ track['name'] }}</h3>
             <p>Duration: {{ track['length_sec'] }} seconds</p>
-            <a href="artists/{{ track['artist_id' ]}}/albums/{{ track['album_id'] }}/tracks/{{ track['id'] }}" class="track-link">View Details</a>
+            <p>Likes: {{ track['likes'] }}</p>
+            <p>Average Rating: {{ track['avg_rate'] }}</p>
+
+            <!-- Edit Track -->
+            <form method="POST" class="edit-track-form">
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="track_id" value="{{ track['id'] }}">
+                <input type="hidden" name="artist_id" value="{{ track['artist_id'] }}">
+                <input type="hidden" name="album_id" value="{{ track['album_id'] }}">
+                <input type="text" name="track_name" value="{{ track['name'] }}" placeholder="New Track Name" required>
+                <input type="number" name="length_sec" value="{{ track['length_sec'] }}" placeholder="New Duration (seconds)" required>
+                <button type="submit" class="btn btn-primary">Edit</button>
+            </form>
+
+            <!-- Like/Unlike -->
+            <form method="POST" class="like-track-form">
+                <input type="hidden" name="action" value="like">
+                <input type="hidden" name="track_id" value="{{ track['id'] }}">
+                <input type="hidden" name="artist_id" value="{{ track['artist_id'] }}">
+                <input type="hidden" name="album_id" value="{{ track['album_id'] }}">
+                <button type="submit" class="btn btn-success">Like</button>
+            </form>
+
+            <form method="POST" class="unlike-track-form">
+                <input type="hidden" name="action" value="unlike">
+                <input type="hidden" name="track_id" value="{{ track['id'] }}">
+                <input type="hidden" name="artist_id" value="{{ track['artist_id'] }}">
+                <input type="hidden" name="album_id" value="{{ track['album_id'] }}">
+                <button type="submit" class="btn btn-warning">Unlike</button>
+            </form>
+
+            <!-- Update Rating -->
+            <form method="POST" class="rate-track-form">
+                <input type="hidden" name="action" value="rate">
+                <input type="hidden" name="track_id" value="{{ track['id'] }}">
+                <input type="hidden" name="artist_id" value="{{ track['artist_id'] }}">
+                <input type="hidden" name="album_id" value="{{ track['album_id'] }}">
+                <input type="number" name="rating" step="0.1" min="0" max="5" placeholder="New Rating" required>
+                <button type="submit" class="btn btn-info">Update Rating</button>
+            </form>
+
+            <!-- Delete Track -->
+            <form method="POST" class="delete-track-form">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="track_id" value="{{ track['id'] }}">
+                <input type="hidden" name="artist_id" value="{{ track['artist_id'] }}">
+                <input type="hidden" name="album_id" value="{{ track['album_id'] }}">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
         </div>
         {% endfor %}
     </section>
     {% elif search_query %}
-
     <div class="no-results">
         <p>No tracks found. Try a different search!</p>
     </div>

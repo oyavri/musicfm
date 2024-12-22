@@ -73,6 +73,85 @@ def no_data():
         }
     ), BAD_REQUEST
 
+@playlists_bp.route('/playlists', methods=['POST'])
+def create_playlist(user_id):
+    try:
+        # Parse request data
+        data = request.get_json()
+
+        # Validate input
+        playlist_name = data.get('name')
+        if not playlist_name:
+            return jsonify({"error": "Playlist name is required"}), 400
+
+        # Connect to database
+        connection = db.connect()
+        cursor = connection.cursor(dictionary=True)
+
+        # Check if user exists
+        cursor.execute("SELECT id FROM USER WHERE id = %s;", (user_id,))
+        user = cursor.fetchone()
+        if not user:
+            cursor.close()
+            connection.close()
+            return jsonify({"error": "User not found"}), 404
+
+        # Insert new playlist
+        cursor.execute(
+            "INSERT INTO PLAYLIST (name, user_id) VALUES (%s, %s);",
+            (playlist_name, user_id),
+        )
+        connection.commit()
+
+        # Fetch the newly created playlist ID
+        playlist_id = cursor.lastrowid
+
+        cursor.close()
+        connection.close()
+
+        return jsonify(
+            {
+                "message": "Playlist created successfully",
+                "playlist": {"id": playlist_id, "name": playlist_name},
+            }
+        ), 201
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": "An internal error occurred"}), 500
+    
+@playlists_bp.route('/playlists/<int:playlist_id>', methods=['DELETE'])
+def delete_playlist(user_id, playlist_id):
+    try:
+        # Connect to the database
+        connection = db.connect()
+        cursor = connection.cursor(dictionary=True)
+
+        # Validate that the playlist exists and belongs to the user
+        cursor.execute(
+            "SELECT id FROM PLAYLIST WHERE id = %s AND user_id = %s;",
+            (playlist_id, user_id),
+        )
+        playlist = cursor.fetchone()
+        if not playlist:
+            cursor.close()
+            connection.close()
+            return jsonify({"error": "Playlist not found or does not belong to the user"}), 404
+
+        # Delete the playlist
+        cursor.execute("DELETE FROM PLAYLIST WHERE id = %s;", (playlist_id,))
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+
+        return jsonify({"message": "Playlist deleted successfully"}), 200
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": "An internal error occurred"}), 500
+
+
 @playlists_bp.route('/playlists', methods=['GET'])
 def get_playlists(user_id):
     try:
@@ -97,16 +176,11 @@ def get_playlists(user_id):
                        WHERE user_id = %s;
                        ''', [user_id])
         playlists = cursor.fetchall()
-
         if not playlists:
             cursor.close()
             connection.close()
-            return jsonify(
-                {
-                    "message": "The user does not have any playlist."
-                }
-            ), OK
-
+            return jsonify([]), OK
+        
         cursor.close()
         connection.close()
         return jsonify(playlists), OK
@@ -172,10 +246,12 @@ def get_playlist(user_id, playlist_id):
         return internal_error()
     
 @playlists_bp.route('/playlists/<playlist_id>', methods=['POST'])
-def add_track_to_playlist():
+def add_track_to_playlist(user_id, playlist_id):
+    
     try:
-        user_id = int(user_id)
-        playlist_id = int(playlist_id)
+        user_id = request.view_args.get('user_id')
+        playlist_id = request.view_args.get('playlist_id')
+
 
         data = request.get_json()
         if not data:

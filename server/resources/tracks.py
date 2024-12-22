@@ -411,71 +411,34 @@ def modify_track(artist_id, album_id, track_id):
         track_id = int(track_id)
 
         data = request.get_json()
+        print(f"Received data: {data}")
+
         if not data:
-            return no_data()
-        
-        name = data.get('name')
-        length_sec = data.get('length_sec')
-        
+            return jsonify({"error": "No data provided"}), BAD_REQUEST
+
+        name = data.get("name")
+        length_sec = data.get("length_sec")
+        print(f"Fields to update: name={name}, length_sec={length_sec}")
+
         if not name and not length_sec:
             return jsonify(
-                {
-                    "error": "No modifiable field has been specified. Modifiable fields are: \"name\", \"length_sec\"."
-                }
+                {"error": "No modifiable field has been specified."}
             ), BAD_REQUEST
-
-        if length_sec:
-            if not is_valid_length(length_sec):
-                return jsonify(
-                    {
-                        "error": "\"length_sec\" field must be float."
-                    }
-                ), BAD_REQUEST
-            # The database stores 3 digits after comma
-            length_sec = round(length_sec, 3)
 
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute('''
-                       SELECT * FROM ARTIST
-                       WHERE id = %s;
-                       ''', [artist_id])
-        artist = cursor.fetchone()
-
-        if artist is None:
-            cursor.close()
-            connection.close()
-            return no_artist()
-        
-        cursor.execute('''
-                       SELECT * FROM ALBUM AS album
-                       JOIN ARTIST AS artist
-                       ON album.artist_id = artist.id
-                       WHERE album.id = %s AND artist.id = %s;
-                       ''', [album_id, artist_id])
-        album = cursor.fetchone()
-
-        if album is None:
-            cursor.close()
-            connection.close()
-            return no_album()
-        
-        cursor.execute('''
-                       SELECT * FROM TRACK AS track
-                       JOIN ALBUM AS album
-                       ON track.album_id = album.id
-                       JOIN ARTIST AS artist
-                       ON album.artist_id = artist.id
-                       WHERE album.id = %s AND artist.id = %s AND track.id = %s;
-                       ''', [album_id, artist_id, track_id])
+        # Verify track existence
+        cursor.execute(
+            "SELECT * FROM TRACK WHERE id = %s AND album_id = %s;", [track_id, album_id]
+        )
         track = cursor.fetchone()
+        print(f"Fetched track: {track}")
 
-        if track is None:
-            cursor.close()
-            connection.close()
-            return no_track()
-        
+        if not track:
+            return jsonify({"error": "Track not found"}), NOT_FOUND
+
+        # Update query
         set_clauses = []
         params = []
 
@@ -487,34 +450,22 @@ def modify_track(artist_id, album_id, track_id):
             params.append(length_sec)
 
         set_clause = ", ".join(set_clauses)
-        params.append(album_id)
+        params.append(track_id)
 
-        cursor.execute('''
-                       UPDATE TRACK 
-                       SET {}
-                       WHERE id = %s;
-                       '''.format(set_clause), params)
+        cursor.execute(
+            f"UPDATE TRACK SET {set_clause} WHERE id = %s;", params
+        )
         connection.commit()
 
         cursor.close()
         connection.close()
 
-        return jsonify(
-            {
-                "message": "Track updated successfully.",
-                "track": {
-                    "album_id": album_id,
-                    "id": track_id,
-                    "name": name,
-                    "length_sec": length_sec
-                }
-            }
-        ), OK
+        return jsonify({"message": "Track updated successfully"}), OK
 
-    except ValueError:
-        return id_error()
-    except:
-        return internal_error()
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": f"Internal error: {e}"}), INTERNAL_SERVER_ERROR
+
 
 @tracks_bp.route('/tracks/<track_id>', methods=['DELETE'])
 def delete_track(artist_id, album_id, track_id):

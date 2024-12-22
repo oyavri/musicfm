@@ -312,10 +312,10 @@ def delete_artist(artist_id):
         cursor.close()
         connection.close()
 
-        return jsonify(
+        return jsonify([
             {
                 "message": "Artist deleted successfully."
-            }
+            }]
         ), OK
     
     except ValueError:

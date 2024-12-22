@@ -4,7 +4,7 @@
 <div class="explore-artists-page">
     <header class="page-header">
         <h1>Explore Artists</h1>
-        <p>Discover your favorite artists and find new inspirations.</p>
+        <p>Discover your favorite artists and manage your collection.</p>
     </header>
 
     <!-- Search Form -->
@@ -12,6 +12,17 @@
         <input type="text" name="q" placeholder="Search artists..." value="{{ search_query }}" class="search-input">
         <button type="submit" class="search-button">Search</button>
     </form>
+
+    <!-- Add Artist Form -->
+    <section class="create-artist">
+        <h2>Create a New Artist</h2>
+        <form method="POST">
+            <input type="hidden" name="action" value="create_artist">
+            <input type="text" name="name" placeholder="Enter artist name" required>
+            <input type="text" name="short_info" placeholder="Enter short info" required>
+            <button type="submit" class="btn-create">Create Artist</button>
+        </form>
+    </section>
 
     <!-- Artists Grid -->
     {% if artists %}
@@ -21,11 +32,26 @@
             <h3>{{ artist['name'] }}</h3>
             <p class="artist-info">{{ artist['short_info'] }}</p>
             <a href="/artists/{{ artist['id'] }}" class="artist-link">View Details</a>
+
+            <!-- Edit Artist -->
+            <form method="POST" class="edit-artist-form">
+                <input type="hidden" name="action" value="update_artist">
+                <input type="hidden" name="artist_id" value="{{ artist['id'] }}">
+                <input type="text" name="name" value="{{ artist['name'] }}" required>
+                <input type="text" name="short_info" value="{{ artist['short_info'] }}" required>
+                <button type="submit" class="btn-edit">Edit</button>
+            </form>
+
+            <!-- Delete Artist -->
+            <form method="POST" class="delete-artist-form">
+                <input type="hidden" name="action" value="delete_artist">
+                <input type="hidden" name="artist_id" value="{{ artist['id'] }}">
+                <button type="submit" class="btn-delete">Delete</button>
+            </form>
         </div>
         {% endfor %}
     </section>
     {% elif search_query %}
-    
     <div class="no-results">
         <p>No artists found. Try a different search!</p>
     </div>

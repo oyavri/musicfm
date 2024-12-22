@@ -74,11 +74,7 @@ def get_albums(artist_id):
         if not albums:
             cursor.close()
             connection.close()
-            return jsonify(
-                {
-                    "message": "There is no album of given artist."
-                }
-            ), OK
+            return jsonify([]), OK
 
         cursor.close()
         connection.close()

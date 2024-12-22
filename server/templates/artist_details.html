@@ -1,28 +1,101 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="artist-details">
-    <header class="artist-header">
-        <h1>{{ artist['name'] }}</h1>
-        <p class="artist-bio">{{ artist['short_info']}}</p>
-    </header>
+  <header class="artist-header">
+    <h1>{{ artist['name'] }}</h1>
+    <p class="artist-bio">{{ artist['short_info'] }}</p>
+    <!-- Delete Artist Form -->
+    <form method="POST" class="delete-artist-form">
+      <input type="hidden" name="action" value="delete_artist" />
+      <input type="hidden" name="artist_id" value="{{ artist['id'] }}" />
+      <button type="submit" class="btn btn-danger">Delete Artist</button>
+    </form>
+  </header>
 
-    <section class="albums-section">
-        <h2>Albums</h2>
-        {% if albums %}
-        <div class="albums-grid">
-            {% for album in albums %}
-            <div class="album-card">
-                <h3>{{ album['name'] }}</h3>
-                <p>Release Date: {{ album['release_date'] }}</p>
-                <a href="/artists/{{ artist['id'] }}/albums/{{ album['album_id'] }}" class="album-link">View Album</a>
+  <!-- Albums Section -->
+  <section class="albums-section">
+    <h2>Albums</h2>
+    {% if albums %}
+    <div class="albums-grid">
+      {% for album in albums %}
+      <div class="album-card">
+        <h3>{{ album['name'] }}</h3>
+        <p>Type: {{ album['type'] }}</p>
+        <p>Release Date: {{ album['release_date'] }}</p>
+        <a
+          href="/artists/{{ artist['id'] }}/albums/{{ album['album_id'] }}"
+          class="album-link"
+          >View Album</a
+        >
 
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <p class="no-albums">This artist has no albums available.</p>
-        {% endif %}
-    </section>
+        <!-- Edit Album Form -->
+        <form method="POST" class="edit-album-form">
+          <input type="hidden" name="action" value="edit_album" />
+          <input
+            type="hidden"
+            name="album_id"
+            value="{{ album['album_id'] }}"
+          />
+          <input
+            type="text"
+            name="album_name"
+            value="{{ album['name'] }}"
+            placeholder="Album Name"
+            required
+          />
+          <input
+            type="text"
+            name="album_type"
+            value="{{ album['type'] }}"
+            placeholder="Album Type"
+            required
+          />
+          <input
+            type="date"
+            name="release_date"
+            value="{{ album['release_date'] }}"
+            required
+          />
+          <button type="submit" class="btn btn-primary">Edit</button>
+        </form>
+
+        <!-- Delete Album Form -->
+        <form method="POST" class="delete-album-form">
+          <input type="hidden" name="action" value="delete_album" />
+          <input
+            type="hidden"
+            name="album_id"
+            value="{{ album['album_id'] }}"
+          />
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="no-albums">This artist has no albums available.</p>
+    {% endif %}
+  </section>
+
+  <!-- Add New Album -->
+  <section class="create-album">
+    <h2>Create a New Album</h2>
+    <form method="POST" class="create-album-form">
+      <input type="hidden" name="action" value="create_album" />
+      <input type="text" name="album_name" placeholder="Album Name" required />
+      <input
+        type="text"
+        name="album_type"
+        placeholder="Album Type (e.g., Studio, Live)"
+        required
+      />
+      <input
+        type="date"
+        name="release_date"
+        placeholder="Release Date"
+        required
+      />
+      <button type="submit" class="btn btn-primary">Create Album</button>
+    </form>
+  </section>
 </div>
 {% endblock %}
