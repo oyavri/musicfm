@@ -341,7 +341,7 @@ def add_track_to_playlist(user_id, playlist_id):
             {
                 "message": "Track added to the playlist successfully."
             }
-        ), OK
+        ), CREATED
 
     except ValueError:
         return id_error_with_track_id()
