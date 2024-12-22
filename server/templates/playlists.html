@@ -33,7 +33,7 @@
       <ul>
         {% for track in playlist.tracks %}
         <li>
-          {{ track.name }} - {{ track.length_sec }} sec
+          {{ track.name }}
           <form method="POST" class="remove-track-form">
             <input type="hidden" name="action" value="remove" />
             <input type="hidden" name="playlist_id" value="{{ playlist.id }}" />
@@ -68,10 +68,11 @@
     <ul>
       {% for track in search_results %}
       <li>
-        {{ track.name }} - {{ track.length_sec }} sec
+        {{ track.name }}
         <form method="POST" class="add-track-form">
           <input type="hidden" name="action" value="add" />
-          <input type="hidden" name="track_id" value="{{ track.id }}" />
+          <input type="hidden" name="track_id" value="{{ track.id }}"
+          />
           <!-- Dropdown to select the playlist -->
           <select name="playlist_id" required>
             <option value="" disabled selected>Select Playlist</option>
