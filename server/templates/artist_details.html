@@ -1,5 +1,6 @@
 {% extends "base.html" %} {% block content %}
 <div class="artist-details">
+  
   <header class="artist-header">
     <h1>{{ artist['name'] }}</h1>
     <p class="artist-bio">{{ artist['short_info'] }}</p>
@@ -11,6 +12,28 @@
     </form>
   </header>
 
+  <!-- Add New Album -->
+  <section class="create-album">
+    <h2>Create a New Album</h2>
+    <form method="POST" class="create-album-form">
+      <input type="hidden" name="action" value="create_album" />
+      <input type="text" name="album_name" placeholder="Album Name" required />
+      <input
+        type="text"
+        name="album_type"
+        placeholder="Album Type (e.g., Studio, Live)"
+        required
+      />
+      <input
+        type="date"
+        name="release_date"
+        placeholder="Release Date"
+        required
+      />
+      <button type="submit" class="btn btn-primary">Create Album</button>
+    </form>
+  </section>
+  
   <!-- Albums Section -->
   <section class="albums-section">
     <h2>Albums</h2>
@@ -76,26 +99,6 @@
     {% endif %}
   </section>
 
-  <!-- Add New Album -->
-  <section class="create-album">
-    <h2>Create a New Album</h2>
-    <form method="POST" class="create-album-form">
-      <input type="hidden" name="action" value="create_album" />
-      <input type="text" name="album_name" placeholder="Album Name" required />
-      <input
-        type="text"
-        name="album_type"
-        placeholder="Album Type (e.g., Studio, Live)"
-        required
-      />
-      <input
-        type="date"
-        name="release_date"
-        placeholder="Release Date"
-        required
-      />
-      <button type="submit" class="btn btn-primary">Create Album</button>
-    </form>
-  </section>
+  
 </div>
 {% endblock %}

@@ -256,7 +256,6 @@ def get_playlist(user_id, playlist_id):
         tracks = cursor.fetchall()
 
         playlist["tracks"] = tracks
-
         cursor.close()
         connection.close()
         return jsonify(
@@ -357,7 +356,6 @@ def remove_track_from_playlist():
         data = request.get_json()
         if not data:
             return no_data()
-        
         track_id = data.get('track_id')
         if not track_id:
             return jsonify(
@@ -405,9 +403,9 @@ def remove_track_from_playlist():
             return no_playlist()
         
         cursor.execute('''
-                       SELECT * FROM PLAYLIST
-                       WHERE id = %s AND user_id = %s;
-                       ''', [playlist_id, user_id])
+                       SELECT * FROM CONTAIN
+                       WHERE playlist_id = %s AND track_id = %s;
+                       ''', [playlist_id, track_id])
         track_in_playlist = cursor.fetchone()
 
         if track_in_playlist is None:
@@ -416,9 +414,11 @@ def remove_track_from_playlist():
             return not_in_playlist()
         
         cursor.execute('''
-                       DELETE FROM CONTAINS 
-                       WHERE track_id = %s AND playlist_id = %s;
+                       DELETE FROM CONTAIN 
+                       WHERE track_id = %s AND playlist_id = %s
+                       LIMIT 1;
                        ''', [track_id, playlist_id])
+        
         connection.commit()
 
         cursor.close()

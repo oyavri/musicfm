@@ -32,14 +32,14 @@ def id_error_including_user():
         {
             "error": "Artist ID, album ID, track ID, and user ID must be an integer."
         }
-    )
+    ), BAD_REQUEST
 
 def id_error_including_user_and_rate():
     return jsonify(
         {
             "error": "Artist ID, album ID, track ID, user ID, and rate must be an integer."
         }
-    )
+    ), BAD_REQUEST
 
 def internal_error():
     return jsonify(
@@ -982,9 +982,9 @@ def rate_track(artist_id, album_id, track_id):
                        SELECT * FROM RATE 
                        WHERE user_id = %s AND track_id = %s;
                        ''', [user_id, track_id])
-        rate = cursor.fetchone()
+        rating = cursor.fetchone()
 
-        if rate is not None:
+        if rating is not None:
             cursor.close()
             connection.close()
             return jsonify(
@@ -1002,10 +1002,10 @@ def rate_track(artist_id, album_id, track_id):
         cursor.close()
         connection.close()
 
-        return jsonify(
+        return jsonify([
             {
                 "message": "Track rated successfully."
-            }
+            }]
         ), OK
 
     except ValueError:
@@ -1108,9 +1108,9 @@ def modify_rate(artist_id, album_id, track_id):
                        SELECT * FROM RATE 
                        WHERE user_id = %s AND track_id = %s;
                        ''', [user_id, track_id])
-        rate = cursor.fetchone()
+        rating = cursor.fetchone()
 
-        if rate is None:
+        if rating is None:
             cursor.close()
             connection.close()
             return jsonify(
@@ -1218,9 +1218,9 @@ def delete_rate(artist_id, album_id, track_id):
                        SELECT * FROM RATE 
                        WHERE user_id = %s AND track_id = %s;
                        ''', [user_id, track_id])
-        rate = cursor.fetchone()
+        rating = cursor.fetchone()
 
-        if rate is None:
+        if rating is None:
             cursor.close()
             connection.close()
             return jsonify(

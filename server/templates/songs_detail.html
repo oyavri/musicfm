@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="playlist-detail-container">
+    <header class="page-header">
+        <h1>{{ playlist.name }}</h1>
+        <p>Manage the tracks in this playlist.</p>
+    </header>
+
+    <!-- Tracks Section -->
+    {% if playlist.tracks|length > 0 %}
+    <section class="tracks-section">
+        <h2>Tracks</h2>
+        <ul class="tracks-list">
+            {% for track in playlist.tracks %}
+            <li class="track-item">
+                <h3>{{ track.name }}</h3>
+                <p>Duration: {{ track.length_sec }} seconds</p>
+
+                <!-- Remove Track -->
+                <form method="POST" class="remove-track-form">
+                    <input type="hidden" name="action" value="remove_track">
+                    <input type="hidden" name="track_id" value="{{ track.id }}">
+                    <button type="submit" class="btn btn-danger">Remove Track</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% else %}
+    <p>No tracks in this playlist yet.</p>
+    {% endif %}
+
+    <!-- Add Tracks Section -->
+    <section class="add-tracks-section">
+        <h2>Add Tracks</h2>
+        <form method="GET" action="/playlists/{{ playlist.id }}" class="search-tracks-form">
+            <input type="text" name="q" placeholder="Search for tracks..." value="{{ search_query }}" class="input-field">
+            <button type="submit" class="btn btn-secondary">Search</button>
+        </form>
+
+        <!-- Search Results -->
+        {% if search_results %}
+        <ul class="search-results-list">
+            {% for track in search_results %}
+            <li class="search-result-item">
+                <h3>{{ track.name }}</h3>
+                <p>Duration: {{ track.length_sec }} seconds</p>
+                <form method="POST" class="add-track-form">
+                    <input type="hidden" name="action" value="add_track">
+                    <input type="hidden" name="track_id" value="{{ track.id }}">
+                    <button type="submit" class="btn btn-success">Add Track</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

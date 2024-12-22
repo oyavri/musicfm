@@ -3,16 +3,6 @@
 {% block content %}
 <div class="form-container">
     <h1>Login</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <ul>
-        {% for category, message in messages %}
-        <li class="flash {{ category }}">{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
-
     <form method="POST">
         <label for="email">Email</label>
         <input type="email" name="email" id="email" required>

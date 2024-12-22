@@ -356,8 +356,10 @@ def ExploreTracksPage():
 
             # Add like
             elif action == "like":
+                user_id = session["user_id"]
                 like_response = requests.post(
                     f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks/{track_id}/likes",
+                    json={"user_id": user_id},
                 )   
 
                 if like_response.status_code == 200:
@@ -367,8 +369,10 @@ def ExploreTracksPage():
 
             # Remove like
             elif action == "unlike":
+                user_id = session["user_id"]
                 unlike_response = requests.delete(
-                    f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks/{track_id}/likes"
+                    f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks/{track_id}/likes",
+                    json={"user_id": user_id}
                 )
                 if unlike_response.status_code == 200:
                     flash("Track unliked successfully!", "success")
@@ -378,17 +382,23 @@ def ExploreTracksPage():
             # Update rating
             elif action == "rate":
                 new_rating = request.form.get("rating")
+                user_id = session["user_id"]
                 if not new_rating:
                     flash("Rating is required.", "error")
                 else:
-                    rate_response = requests.patch(
+                    rate_response = requests.post(
                         f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks/{track_id}/rates",
-                        json={"rating": float(new_rating)},
+                        json={"rate": int(new_rating), "user_id": user_id},
+                    )
+                    if rates_response.status_code == 409:
+                        rate_response = requests.patch(
+                        f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks/{track_id}/rates",
+                        json={"rate": int(new_rating), "user_id": user_id},
                     )
                     if rate_response.status_code == 200:
                         flash("Track rating updated successfully!", "success")
                     else:
-                        flash("Failed to update rating. Try again.", "error")
+                        flash(rate_response.json().get("error", []), "error")
 
             # Redirect back with the search query
             return redirect(url_for("ExploreTracksPage", q=search_query))
@@ -485,19 +495,26 @@ def user_playlists():
     user_id = session["user_id"]
 
     try:
-        # Fetch user's playlists
-        response = requests.get(f"http://localhost:5000/api/users/{user_id}/playlists")
-        if response.status_code != 200:
-            playlists = []
-        else:
-            playlists = response.json()
+        # Utility function to fetch all playlists
+        def fetch_playlists():
+            response = requests.get(f"http://localhost:5000/api/users/{user_id}/playlists")
+            if response.status_code == 200:
+                return response.json()
+            return []
 
+        # Utility function to fetch a specific playlist with its tracks
+        def fetch_playlist_with_tracks(playlist_id):
+            response = requests.get(f"http://localhost:5000/api/users/{user_id}/playlists/{playlist_id}")
+            if response.status_code == 200:
+                return response.json().get("playlist", {})
+            return {}
 
+        # Fetch playlists initially
+        playlists = fetch_playlists()
 
+        # Handle search query for tracks
         search_query = request.args.get("q", "")
         search_results = []
-
-        # Handle track search
         if search_query:
             search_response = requests.get(
                 f"http://localhost:5000/api/search",
@@ -518,7 +535,7 @@ def user_playlists():
             playlist_id = request.form.get("playlist_id")
             track_id = request.form.get("track_id")
 
-            # Create a playlist
+            # Create a new playlist
             if action == "create_playlist":
                 if not playlist_name:
                     flash("Playlist name is required.", "error")
@@ -527,12 +544,13 @@ def user_playlists():
                         f"http://localhost:5000/api/users/{user_id}/playlists",
                         json={"name": playlist_name},
                     )
-                    if create_response.status_code == 201:
+                    if create_response.status_code == 200:
                         flash("Playlist created successfully!", "success")
+                        playlists = fetch_playlists()
                     else:
                         flash("Failed to create playlist. Try again.", "error")
 
-            # Add track to playlist
+            # Add a track to a playlist
             elif action == "add":
                 if not playlist_id or not track_id:
                     flash("Playlist ID and Track ID are required.", "error")
@@ -541,25 +559,10 @@ def user_playlists():
                         f"http://localhost:5000/api/users/{user_id}/playlists/{playlist_id}",
                         json={"track_id": track_id},
                     )
-
                     if add_response.status_code == 201:
                         flash("Track added to playlist successfully!", "success")
                     else:
                         flash("Failed to add track. Try again.", "error")
-
-            # Remove track from playlist
-            elif action == "remove":
-                if not playlist_id or not track_id:
-                    flash("Playlist ID and Track ID are required.", "error")
-                else:
-                    remove_response = requests.post(
-                        f"http://localhost:5000/api/users/{user_id}/playlists/{playlist_id}/remove",
-                        json={"track_id": track_id},
-                    )
-                    if remove_response.status_code == 200:
-                        flash("Track removed from playlist successfully!", "success")
-                    else:
-                        flash("Failed to remove track. Try again.", "error")
 
             # Delete a playlist
             elif action == "delete_playlist":
@@ -571,22 +574,91 @@ def user_playlists():
                     )
                     if delete_response.status_code == 200:
                         flash("Playlist deleted successfully!", "success")
+                        playlists = fetch_playlists()
                     else:
                         flash("Failed to delete playlist. Try again.", "error")
 
-            return redirect(url_for("user_playlists"))
+            # Redirect back to the same page with the search query preserved
+            return redirect(url_for("user_playlists", q=search_query))
 
+        # Render the playlists page
         return render_template(
             "playlists.html", playlists=playlists, search_results=search_results, search_query=search_query
         )
 
     except Exception as e:
-        print(f"Error: {e}")
-        flash("An error occurred while managing playlists.", "error")
+        app.logger.error(f"Error managing playlists: {e}")
+        flash("An error occurred. Please try again.", "error")
         return redirect(url_for("HomePage"))
 
+@app.route("/playlists/<int:playlist_id>", methods=["GET", "POST"])
+def playlist_details(playlist_id):
+    if "user_id" not in session:
+        flash("You need to log in to view playlists.", "error")
+        return redirect(url_for("login"))
 
+    user_id = session["user_id"]
 
+    try:
+        # Handle POST actions for adding/removing tracks
+        if request.method == "POST":
+            action = request.form.get("action")
+            track_id = request.form.get("track_id")
+
+            if action == "add_track":
+                if not track_id:
+                    flash("Track ID is required to add a track.", "error")
+                else:
+                    add_response = requests.post(
+                        f"http://localhost:5000/api/users/{user_id}/playlists/{playlist_id}",
+                        json={"track_id": track_id},
+                    )
+                    if add_response.status_code == 201:
+                        flash("Track added successfully!", "success")
+                    else:
+                        flash("Failed to add track. Try again.", "error")
+
+            elif action == "remove_track":
+                if not track_id:
+                    flash("Track ID is required to remove a track.", "error")
+                else:
+                    remove_response = requests.delete(
+                        f"http://localhost:5000/api/users/{user_id}/playlists/{playlist_id}",
+                        json={"track_id": track_id},
+                    )
+                    if remove_response.status_code == 200:
+                        flash("Track removed successfully!", "success")
+                    else:
+                        flash("Failed to remove track. Try again.", "error")
+
+            return redirect(url_for("playlist_details", playlist_id=playlist_id))
+
+        # Fetch playlist details and search results for adding tracks
+        response = requests.get(f"http://localhost:5000/api/users/{user_id}/playlists/{playlist_id}")
+        if response.status_code != 200:
+            flash("Could not fetch playlist details. Try again.", "error")
+            return redirect(url_for("user_playlists"))
+
+        playlist = response.json().get("playlist", {})
+        search_query = request.args.get("q", "")
+        search_results = []
+
+        if search_query:
+            search_response = requests.get(
+                f"http://localhost:5000/api/search",
+                params={"q": search_query, "filter": "track", "limit": 10},
+            )
+            if search_response.status_code == 200:
+                search_results = search_response.json().get("result", [])
+
+        return render_template(
+            "songs_detail.html", playlist=playlist, search_query=search_query, search_results=search_results
+        )
+
+    except Exception as e:
+        app.logger.error(f"Error fetching playlist details: {e}")
+        flash("An error occurred. Please try again.", "error")
+        return redirect(url_for("user_playlists"))
 
 if __name__ == "__main__":
     db()

@@ -1727,3 +1727,31 @@ form button:hover {
     box-sizing: border-box;
     text-align: center;
 }
+
+/* View Details Button */
+.btn-info {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #3498db; /* Mavi arka plan */
+    color: #fff; /* Beyaz yazı */
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none; /* Alt çizgi kaldır */
+    border-radius: 5px;
+    transition: all 0.3s ease; /* Yumuşak geçiş */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+}
+
+.btn-info:hover {
+    background-color: #2980b9; /* Hover için daha koyu mavi */
+    transform: translateY(-3px); /* Hover sırasında hafif yukarı */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Hover gölgesi */
+}
+
+.btn-info:active {
+    background-color: #1c598a; /* Tıklama sırasında daha koyu */
+    transform: translateY(1px); /* Hafif aşağı iter */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Daha küçük gölge */
+}
+

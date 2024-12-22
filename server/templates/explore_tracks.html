@@ -57,7 +57,7 @@
                 <input type="hidden" name="track_id" value="{{ track['id'] }}">
                 <input type="hidden" name="artist_id" value="{{ track['artist_id'] }}">
                 <input type="hidden" name="album_id" value="{{ track['album_id'] }}">
-                <input type="number" name="rating" step="0.1" min="0" max="5" placeholder="New Rating" required>
+                <input type="number" name="rating" step="1" min="0" max="5" placeholder="New Rating" required>
                 <button type="submit" class="btn btn-info">Update Rating</button>
             </form>
 
