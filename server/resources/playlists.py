@@ -31,10 +31,10 @@ def id_error_with_track_id():
             }
         ), BAD_REQUEST
 
-def internal_error(e):
+def internal_error():
     return jsonify(
         {
-            "error": f"An internal error occurred. {e}"
+            "error": "An internal error occurred."
         }
     ), INTERNAL_SERVER_ERROR
 
@@ -267,8 +267,8 @@ def get_playlist(user_id, playlist_id):
         
     except ValueError:
         return id_error()
-    except Exception as e:
-        return internal_error(e)
+    except:
+        return internal_error()
     
 @playlists_bp.route('/playlists/<playlist_id>', methods=['POST'])
 def add_track_to_playlist(user_id, playlist_id):
@@ -345,8 +345,8 @@ def add_track_to_playlist(user_id, playlist_id):
 
     except ValueError:
         return id_error_with_track_id()
-    except Exception as e:
-        return internal_error(e)
+    except:
+        return internal_error()
 
 @playlists_bp.route('/playlists/<playlist_id>', methods=['DELETE'])
 def remove_track_from_playlist():

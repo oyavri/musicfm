@@ -462,9 +462,8 @@ def modify_track(artist_id, album_id, track_id):
 
         return jsonify({"message": "Track updated successfully"}), OK
 
-    except Exception as e:
-        print(f"Error: {e}")
-        return jsonify({"error": f"Internal error: {e}"}), INTERNAL_SERVER_ERROR
+    except:
+        return internal_error()
 
 
 @tracks_bp.route('/tracks/<track_id>', methods=['DELETE'])
