@@ -131,9 +131,110 @@ def ArtistDetailsPage(artist_id):
         return redirect(url_for("ExploreArtistsPage"))
 
 
-@app.route("/artists/<int:artist_id>/albums/<int:album_id>")
+@app.route("/artists/<int:artist_id>/albums/<int:album_id>", methods=["GET", "POST"])
 def AlbumDetailsPage(artist_id, album_id):
     try:
+        # Handle POST actions for adding, editing, or removing tracks
+        if request.method == "POST":
+            action = request.form.get("action")
+            track_id = request.form.get("track_id")
+            track_name = request.form.get("track_name")
+            length_sec = request.form.get("length_sec")
+
+            # Add track
+            if action == "add_track":
+                if not track_name or not length_sec:
+                    flash("Track name and length are required to add a track.", "error")
+                else:
+                    add_response = requests.post(
+                        f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks",
+                        json={"name": track_name, "length_sec": length_sec},
+                    )
+                    if add_response.status_code == 201:
+                        flash("Track added successfully!", "success")
+                    else:
+                        flash("Failed to add track. Try again.", "error")
+
+            # Edit track
+            elif action == "edit_track":
+                if not track_id or not track_name or not length_sec:
+                    flash("Track ID, name, and length are required to edit a track.", "error")
+                else:
+                    edit_response = requests.put(
+                        f"http://localhost:5000/api/tracks/{track_id}",
+                        json={"name": track_name, "length_sec": length_sec},
+                    )
+                    if edit_response.status_code == 200:
+                        flash("Track updated successfully!", "success")
+                    else:
+                        flash("Failed to update track. Try again.", "error")
+
+            # Remove track
+            elif action == "remove_track":
+                if not track_id:
+                    flash("Track ID is required to remove a track.", "error")
+                else:
+                    remove_response = requests.delete(
+                        f"http://localhost:5000/api/tracks/{track_id}"
+                    )
+                    if remove_response.status_code == 200:
+                        flash("Track removed successfully!", "success")
+                    else:
+                        flash("Failed to remove track. Try again.", "error")
+
+            # Like track
+            elif action == "like_track":
+                user_id = session.get("user_id")
+                if not user_id:
+                    flash("You need to log in to like a track.", "error")
+                else:
+                    like_response = requests.post(
+                        f"http://localhost:5000/api/tracks/{track_id}/likes",
+                        json={"user_id": user_id},
+                    )
+                    if like_response.status_code == 200:
+                        flash("Track liked successfully!", "success")
+                    else:
+                        flash("Failed to like track. Try again.", "error")
+
+            # Unlike track
+            elif action == "unlike_track":
+                user_id = session.get("user_id")
+                if not user_id:
+                    flash("You need to log in to unlike a track.", "error")
+                else:
+                    unlike_response = requests.delete(
+                        f"http://localhost:5000/api/tracks/{track_id}/likes",
+                        json={"user_id": user_id},
+                    )
+                    if unlike_response.status_code == 200:
+                        flash("Track unliked successfully!", "success")
+                    else:
+                        flash("Failed to unlike track. Try again.", "error")
+
+            # Rate track
+            elif action == "rate_track":
+                user_id = session.get("user_id")
+                new_rating = request.form.get("rating")
+                if not user_id or not new_rating:
+                    flash("Rating and login are required to rate a track.", "error")
+                else:
+                    rate_response = requests.post(
+                        f"http://localhost:5000/api/tracks/{track_id}/rates",
+                        json={"rate": int(new_rating), "user_id": user_id},
+                    )
+                    if rate_response.status_code == 409:
+                        rate_response = requests.patch(
+                            f"http://localhost:5000/api/tracks/{track_id}/rates",
+                            json={"rate": int(new_rating), "user_id": user_id},
+                        )
+                    if rate_response.status_code == 200:
+                        flash("Track rating updated successfully!", "success")
+                    else:
+                        flash("Failed to rate track. Try again.", "error")
+
+            return redirect(url_for("AlbumDetailsPage", artist_id=artist_id, album_id=album_id))
+
         # Fetch artist, album, and tracks details
         artist_response = requests.get(f"http://localhost:5000/api/artists/{artist_id}").json()
         album_response = requests.get(f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}").json()
@@ -148,28 +249,12 @@ def AlbumDetailsPage(artist_id, album_id):
             track_id = track["id"]
 
             # Fetch likes for the track
-            likes_response = requests.get(
-                f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks/{track_id}/likes"
-            ).json()
-            # Check if likes_response is a list and extract "like_count"
-            if isinstance(likes_response, list) and likes_response:
-                track["likes"] = likes_response[0].get("like_count", 0)
-            elif isinstance(likes_response, dict):
-                track["likes"] = likes_response.get("like_count", 0)
-            else:
-                track["likes"] = 0
+            likes_response = requests.get(f"http://localhost:5000/api/tracks/{track_id}/likes").json()
+            track["likes"] = likes_response.get("like_count", 0) if isinstance(likes_response, dict) else 0
 
             # Fetch rates for the track
-            rates_response = requests.get(
-                f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks/{track_id}/rates"
-            ).json()
-            # Check if rates_response is a list and extract "average_rate"
-            if isinstance(rates_response, list) and rates_response:
-                track["avg_rate"] = rates_response[0].get("average_rate", 0.0)
-            elif isinstance(rates_response, dict):
-                track["avg_rate"] = rates_response.get("average_rate", 0.0)
-            else:
-                track["avg_rate"] = 0.0
+            rates_response = requests.get(f"http://localhost:5000/api/tracks/{track_id}/rates").json()
+            track["avg_rate"] = rates_response.get("average_rate", 0.0) if isinstance(rates_response, dict) else 0.0
 
         return render_template(
             "album_details.html",
@@ -178,6 +263,7 @@ def AlbumDetailsPage(artist_id, album_id):
             album=album_response,
             tracks=tracks_response,
         )
+
     except requests.exceptions.RequestException as e:
         app.logger.error(f"Error fetching album data: {e}")
         return render_template("500.html", title="Internal Server Error"), 500
@@ -623,8 +709,7 @@ def playlist_details(playlist_id):
                     flash("Track ID is required to remove a track.", "error")
                 else:
                     remove_response = requests.delete(
-                        f"http://localhost:5000/api/users/{user_id}/playlists/{playlist_id}",
-                        json={"track_id": track_id},
+                        f"http://localhost:5000/api/users/{user_id}/playlists/{playlist_id}/tracks/{track_id}"
                     )
                     if remove_response.status_code == 200:
                         flash("Track removed successfully!", "success")
@@ -659,6 +744,74 @@ def playlist_details(playlist_id):
         app.logger.error(f"Error fetching playlist details: {e}")
         flash("An error occurred. Please try again.", "error")
         return redirect(url_for("user_playlists"))
+
+@app.route("/profile", methods=["GET", "POST"])
+def profile():
+    if "user_id" not in session:
+        flash("You need to log in to access your profile.", "error")
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+    
+    try:
+        if request.method == "GET":
+            response = requests.get(f"http://localhost:5000/api/users/{user_id}")
+            if response.status_code != 200:
+                flash("Failed to load profile information.", "error")
+                return redirect(url_for("HomePage"))
+            
+            user = response.json()
+            return render_template("profile.html", user=user)
+        
+        elif request.method == "POST":
+            nickname = request.form.get("nickname")
+            email = request.form.get("email")
+            gender = request.form.get("gender")
+            if not nickname or not email:
+                flash("Nickname and email are required.", "error")
+                return redirect(url_for("profile"))
+
+            update_response = requests.put(
+                f"http://localhost:5000/api/users/{user_id}",
+                json={"nickname": nickname, "email": email, "gender": gender},
+            )
+            if update_response.status_code == 200:
+                session["nickname"] = nickname
+                flash("Profile updated successfully!", "success")
+            else:
+                flash("Failed to update profile. Try again.", "error")
+
+            return redirect(url_for("profile"))
+
+    except Exception as e:
+        app.logger.error(f"Error fetching or updating profile: {e}")
+        flash("An error occurred. Please try again later.", "error")
+        return redirect(url_for("HomePage"))
+
+
+@app.route("/profile/delete", methods=["POST"])
+def delete_profile():
+    if "user_id" not in session:
+        flash("You need to log in to delete your profile.", "error")
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+
+    try:
+        delete_response = requests.delete(f"http://localhost:5000/api/users/{user_id}")
+        if delete_response.status_code == 200:
+            session.clear()
+            flash("Account deleted successfully.", "success")
+            return redirect(url_for("register"))
+        else:
+            flash("Failed to delete account. Try again.", "error")
+            return redirect(url_for("profile"))
+
+    except Exception as e:
+        app.logger.error(f"Error deleting profile: {e}")
+        flash("An error occurred. Please try again later.", "error")
+        return redirect(url_for("profile"))
+
 
 if __name__ == "__main__":
     db()
