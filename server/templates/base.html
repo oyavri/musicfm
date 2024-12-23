@@ -18,14 +18,14 @@
             <li><a href="/playlists">Playlists</a></li>
             
             {% if session.get('nickname') %}
-                <li><span class="navbar-username">{{ session['nickname'] }}</span></li>
+                <li><a href="/profile" class="navbar-username">{{ session['nickname'] }}</a></li>
                 <li><a href="/logout">Logout</a></li>
             {% else %}
                 <li><a href="/register">Register</a></li>
                 <li><a href="/login">Login</a></li>
             {% endif %}
         </ul>
-    </nav>
+    </nav>    
 
     <!-- Flash Messages -->
     <div class="flash-messages">

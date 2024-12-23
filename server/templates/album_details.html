@@ -17,6 +17,7 @@
           <th>Length (Seconds)</th>
           <th>Likes</th>
           <th>Average Rating</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -26,6 +27,45 @@
           <td>{{ track.length_sec }}</td>
           <td>{{ track.likes }}</td>
           <td>{{ track.avg_rate }}</td>
+          <td>
+            <!-- Edit Track -->
+            <form method="POST" class="inline-form">
+              <input type="hidden" name="action" value="edit_track">
+              <input type="hidden" name="track_id" value="{{ track.id }}">
+              <input type="text" name="track_name" value="{{ track.name }}" placeholder="New Name" required>
+              <input type="number" name="length_sec" value="{{ track.length_sec }}" placeholder="New Length" required>
+              <button type="submit" class="btn btn-primary">Edit</button>
+            </form>
+
+            <!-- Remove Track -->
+            <form method="POST" class="inline-form">
+              <input type="hidden" name="action" value="remove_track">
+              <input type="hidden" name="track_id" value="{{ track.id }}">
+              <button type="submit" class="btn btn-danger">Remove</button>
+            </form>
+
+            <!-- Like Track -->
+            <form method="POST" class="inline-form">
+              <input type="hidden" name="action" value="like_track">
+              <input type="hidden" name="track_id" value="{{ track.id }}">
+              <button type="submit" class="btn btn-success">Like</button>
+            </form>
+
+            <!-- Unlike Track -->
+            <form method="POST" class="inline-form">
+              <input type="hidden" name="action" value="unlike_track">
+              <input type="hidden" name="track_id" value="{{ track.id }}">
+              <button type="submit" class="btn btn-warning">Unlike</button>
+            </form>
+
+            <!-- Rate Track -->
+            <form method="POST" class="inline-form">
+              <input type="hidden" name="action" value="rate_track">
+              <input type="hidden" name="track_id" value="{{ track.id }}">
+              <input type="number" step="0.1" min="0" max="5" name="rating" placeholder="Rate (0-5)" required>
+              <button type="submit" class="btn btn-info">Rate</button>
+            </form>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -34,5 +74,21 @@
     <p class="no-tracks">No tracks available for this album.</p>
     {% endif %}
   </section>
+
+  <!-- Add New Track Section -->
+  <section class="add-track-section">
+    <h2>Add a New Track</h2>
+    <form method="POST">
+      <input type="hidden" name="action" value="add_track">
+      <input type="text" name="track_name" placeholder="Track Name" required>
+      <input type="number" name="length_sec" placeholder="Length (Seconds)" required>
+      <button type="submit" class="btn btn-primary">Add Track</button>
+    </form>
+  </section>
+
+  <!-- Back to Artist -->
+  <div class="back-to-artist">
+    <a href="/artists/{{ artist['id'] }}" class="btn btn-secondary">Back to Artist</a>
+  </div>
 </div>
 {% endblock %}
