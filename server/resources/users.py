@@ -17,7 +17,7 @@ def is_valid_email(email):
     
 
 def is_valid_gender(gender):
-    if gender == 'M' or gender == 'F':
+    if gender == 'M' or gender == 'F' or gender == ' ':
         return True
     return False
 
@@ -35,10 +35,10 @@ def id_error_including_track():
         }
     ), BAD_REQUEST
 
-def internal_error():
+def internal_error(e):
     return jsonify(
         {
-            "error": "An internal error occurred."
+            "error": f"An internal error occurred. {e}"
         }
     ), INTERNAL_SERVER_ERROR
 
@@ -343,7 +343,7 @@ def modify_user(user_id):
                         "error": "Genders must be either one of \"M\" or \"F\", or not provided."
                     }
                 ), BAD_REQUEST
-
+            
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
 
@@ -384,11 +384,11 @@ def modify_user(user_id):
 
         set_clause = ", ".join(set_clauses)
         params.append(user_id)
-            
+
         cursor.execute('''
                        UPDATE USER
                        SET {} 
-                       WHERE id = {user_id};
+                       WHERE id = %s;
                        '''.format(set_clause), params)
         connection.commit()
 
@@ -409,8 +409,8 @@ def modify_user(user_id):
     
     except ValueError:
         return id_error()
-    except:
-        return internal_error()
+    except Exception as e:
+        return internal_error(e)
 
 @users_bp.route('/users/<user_id>', methods=['DELETE'])
 def delete_user(user_id):

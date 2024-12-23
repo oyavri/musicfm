@@ -41,10 +41,10 @@ def id_error_including_user_and_rate():
         }
     ), BAD_REQUEST
 
-def internal_error():
+def internal_error(e):
     return jsonify(
         {
-            "error": "An internal error occurred."
+            "error": f"An internal error occurred. {e}"
         }
     ), INTERNAL_SERVER_ERROR
 
@@ -239,7 +239,7 @@ def add_track(artist_id, album_id):
             ), BAD_REQUEST
         
         # The database stores 3 digits after comma
-        length_sec = round(length_sec, 3)
+        length_sec = round(float(length_sec), 3)
 
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
@@ -293,8 +293,8 @@ def add_track(artist_id, album_id):
     
     except ValueError:
         return id_error()
-    except:
-        return internal_error()
+    except Exception as e:
+        return internal_error(e)
 
 @tracks_bp.route('/tracks/<track_id>', methods=['PUT'])
 def update_track(artist_id, album_id, track_id):
@@ -331,7 +331,7 @@ def update_track(artist_id, album_id, track_id):
             ), BAD_REQUEST
         
         # The database stores 3 digits after comma
-        length_sec = round(length_sec, 3)
+        length_sec = round(float(length_sec), 3)
 
         connection = db.connect()
         cursor = connection.cursor(dictionary=True)
@@ -377,7 +377,7 @@ def update_track(artist_id, album_id, track_id):
         
         cursor.execute('''
                        UPDATE TRACK 
-                       SET name = %s, length_sec = %s"
+                       SET name = %s, length_sec = %s
                        WHERE id = %s;
                        ''', [name, length_sec, track_id])
         connection.commit()
@@ -411,14 +411,11 @@ def modify_track(artist_id, album_id, track_id):
         track_id = int(track_id)
 
         data = request.get_json()
-        print(f"Received data: {data}")
-
         if not data:
-            return jsonify({"error": "No data provided"}), BAD_REQUEST
+            return no_data()
 
         name = data.get("name")
         length_sec = data.get("length_sec")
-        print(f"Fields to update: name={name}, length_sec={length_sec}")
 
         if not name and not length_sec:
             return jsonify(
@@ -433,7 +430,6 @@ def modify_track(artist_id, album_id, track_id):
             "SELECT * FROM TRACK WHERE id = %s AND album_id = %s;", [track_id, album_id]
         )
         track = cursor.fetchone()
-        print(f"Fetched track: {track}")
 
         if not track:
             return jsonify({"error": "Track not found"}), NOT_FOUND

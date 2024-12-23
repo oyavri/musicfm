@@ -11,9 +11,9 @@
         
         <label for="gender">Gender</label>
         <select id="gender" name="gender" required>
-            <option value="M" {% if user['gender'] == 'male' %}selected{% endif %}>Male</option>
-            <option value="F" {% if user['gender'] == 'female' %}selected{% endif %}>Female</option>
-            <option value="" {% if user['gender'] == 'other' %}selected{% endif %}>Other</option>
+            <option value="M" {% if user['gender'] == 'M' %}selected{% endif %}>Male</option>
+            <option value="F" {% if user['gender'] == 'F' %}selected{% endif %}>Female</option>
+            <option value=" " {% if user['gender'] == '' %}selected{% endif %}>Other</option>
         </select>
 
         <button type="submit" class="btn btn-primary">Update Profile</button>

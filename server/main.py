@@ -150,6 +150,7 @@ def AlbumDetailsPage(artist_id, album_id):
                         f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks",
                         json={"name": track_name, "length_sec": length_sec},
                     )
+                    print(add_response)
                     if add_response.status_code == 201:
                         flash("Track added successfully!", "success")
                     else:
@@ -161,9 +162,11 @@ def AlbumDetailsPage(artist_id, album_id):
                     flash("Track ID, name, and length are required to edit a track.", "error")
                 else:
                     edit_response = requests.put(
-                        f"http://localhost:5000/api/tracks/{track_id}",
+                        f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks/{track_id}",
                         json={"name": track_name, "length_sec": length_sec},
                     )
+
+                    print(edit_response)
                     if edit_response.status_code == 200:
                         flash("Track updated successfully!", "success")
                     else:
@@ -175,7 +178,7 @@ def AlbumDetailsPage(artist_id, album_id):
                     flash("Track ID is required to remove a track.", "error")
                 else:
                     remove_response = requests.delete(
-                        f"http://localhost:5000/api/tracks/{track_id}"
+                        f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks/{track_id}"
                     )
                     if remove_response.status_code == 200:
                         flash("Track removed successfully!", "success")
@@ -189,7 +192,7 @@ def AlbumDetailsPage(artist_id, album_id):
                     flash("You need to log in to like a track.", "error")
                 else:
                     like_response = requests.post(
-                        f"http://localhost:5000/api/tracks/{track_id}/likes",
+                        f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks/{track_id}/likes",
                         json={"user_id": user_id},
                     )
                     if like_response.status_code == 200:
@@ -204,7 +207,7 @@ def AlbumDetailsPage(artist_id, album_id):
                     flash("You need to log in to unlike a track.", "error")
                 else:
                     unlike_response = requests.delete(
-                        f"http://localhost:5000/api/tracks/{track_id}/likes",
+                        f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks/{track_id}/likes",
                         json={"user_id": user_id},
                     )
                     if unlike_response.status_code == 200:
@@ -220,12 +223,12 @@ def AlbumDetailsPage(artist_id, album_id):
                     flash("Rating and login are required to rate a track.", "error")
                 else:
                     rate_response = requests.post(
-                        f"http://localhost:5000/api/tracks/{track_id}/rates",
+                        f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks/{track_id}/rates",
                         json={"rate": int(new_rating), "user_id": user_id},
                     )
                     if rate_response.status_code == 409:
                         rate_response = requests.patch(
-                            f"http://localhost:5000/api/tracks/{track_id}/rates",
+                            f"http://localhost:5000/artists/{artist_id}/albums/{album_id}/api/tracks/{track_id}/rates",
                             json={"rate": int(new_rating), "user_id": user_id},
                         )
                     if rate_response.status_code == 200:
@@ -249,11 +252,11 @@ def AlbumDetailsPage(artist_id, album_id):
             track_id = track["id"]
 
             # Fetch likes for the track
-            likes_response = requests.get(f"http://localhost:5000/api/tracks/{track_id}/likes").json()
+            likes_response = requests.get(f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks/{track_id}/likes").json()
             track["likes"] = likes_response.get("like_count", 0) if isinstance(likes_response, dict) else 0
 
             # Fetch rates for the track
-            rates_response = requests.get(f"http://localhost:5000/api/tracks/{track_id}/rates").json()
+            rates_response = requests.get(f"http://localhost:5000/api/artists/{artist_id}/albums/{album_id}/tracks/{track_id}/rates").json()
             track["avg_rate"] = rates_response.get("average_rate", 0.0) if isinstance(rates_response, dict) else 0.0
 
         return render_template(
@@ -767,14 +770,23 @@ def profile():
             nickname = request.form.get("nickname")
             email = request.form.get("email")
             gender = request.form.get("gender")
+
             if not nickname or not email:
                 flash("Nickname and email are required.", "error")
                 return redirect(url_for("profile"))
 
-            update_response = requests.put(
-                f"http://localhost:5000/api/users/{user_id}",
-                json={"nickname": nickname, "email": email, "gender": gender},
-            )
+            current_email = requests.get(f"http://localhost:5000/api/users/{user_id}").json().get("email")
+            if (email == current_email):
+                update_response = requests.patch(
+                    f"http://localhost:5000/api/users/{user_id}",
+                    json={"nickname": nickname, "gender": gender},
+                )
+            else: 
+                update_response = requests.patch(
+                    f"http://localhost:5000/api/users/{user_id}",
+                    json={"nickname": nickname, "email": email, "gender": gender},
+                )
+
             if update_response.status_code == 200:
                 session["nickname"] = nickname
                 flash("Profile updated successfully!", "success")

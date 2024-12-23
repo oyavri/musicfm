@@ -62,7 +62,7 @@
             <form method="POST" class="inline-form">
               <input type="hidden" name="action" value="rate_track">
               <input type="hidden" name="track_id" value="{{ track.id }}">
-              <input type="number" step="0.1" min="0" max="5" name="rating" placeholder="Rate (0-5)" required>
+              <input type="number" step="1" min="0" max="5" name="rating" placeholder="Rate (0-5)" required>
               <button type="submit" class="btn btn-info">Rate</button>
             </form>
           </td>
